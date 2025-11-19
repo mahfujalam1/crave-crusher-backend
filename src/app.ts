@@ -6,24 +6,21 @@ import errorMiddleware from "./app/middleware/globalErrorHandler";
 const app = express();
 
 app.use(express.json());
-// const corsOptions = {
-//   origin: 'http://localhost:5173', // Frontend URL
-//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-//   credentials: true, // Allow cookies if needed
-//   optionsSuccessStatus: 204
-// };
+const corsOptions = {
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204
+};
 
 app.use(
-  cors({
-    origin: ["https://meeting-room-client-delta.vercel.app"],
-    credentials: true,
-  })
+  cors(corsOptions)
 );
 
 app.use("/api/v1", router);
 
 const test = async (req: Request, res: Response) => {
-  res.send({ message: "Co-Working server is running" });
+  res.send({ message: "Crave Crusher server is running" });
 };
 
 app.get("/", test);
