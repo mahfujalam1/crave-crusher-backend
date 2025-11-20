@@ -9,6 +9,7 @@ import httpStatus from "http-status";
 import { TUserRole } from "../user/user-interface";
 import { createToken } from "../user/user.utils";
 import { TLogin } from "./auth-interface";
+import { JwtPayload } from "jsonwebtoken";
 
 const generateVerifyCode = (): number => {
   return Math.floor(100000 + Math.random() * 900000);
@@ -39,7 +40,6 @@ const logInUserIntoDB = async (payload: TLogin) => {
     email: user!.email,
     role: user!.role as TUserRole,
   };
-  console.log(config)
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_screet as string,
@@ -51,11 +51,61 @@ const logInUserIntoDB = async (payload: TLogin) => {
     config.jwt_access_expires_in
   );
 
-  
+
   return {
     accessToken,
     refreshToken,
   };
+};
+
+
+const changePasswordIntoDB = async (
+  userData: JwtPayload,
+  payload: {
+    oldPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+  }
+) => {
+  if (payload.newPassword !== payload.confirmNewPassword) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Password and confirm password doesn't match"
+    );
+  }
+  const user = await User.findById(userData.id);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user does not exist');
+  }
+  if (user.isDeleted) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'This user is already deleted'
+    );
+  }
+  if (user.isBlocked) {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked');
+  }
+
+  if (!(await User.isPasswordMatched(payload?.oldPassword, user?.password))) {
+    throw new AppError(httpStatus.FORBIDDEN, 'Password do not match');
+  }
+  //hash new password
+  const newHashedPassword = await bcrypt.hash(
+    payload.newPassword,
+    Number(config.bcrypt_salt_rounds)
+  );
+  await User.findOneAndUpdate(
+    {
+      _id: userData.id,
+      role: userData.role,
+    },
+    {
+      password: newHashedPassword,
+      passwordChangedAt: new Date(),
+    }
+  );
+  return null;
 };
 
 
@@ -180,12 +230,12 @@ const resetPassword = async (payload: {
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_screet as string,
-    config.jwt_access_expires_in 
+    config.jwt_access_expires_in
   );
   const refreshToken = createToken(
     jwtPayload,
     config.jwt_access_screet as string,
-    config.jwt_access_expires_in 
+    config.jwt_access_expires_in
   );
 
   return { accessToken, refreshToken };
@@ -265,4 +315,5 @@ export const AuthServices = {
   resendVerifyCode,
   resetPassword,
   verifyResetOtp,
+  changePasswordIntoDB,
 };

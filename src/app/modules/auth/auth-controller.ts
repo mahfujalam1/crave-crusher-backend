@@ -38,6 +38,22 @@ const forgetPassword = catchAsync(async (req, res) => {
 });
 
 
+const changePassword = catchAsync(async (req, res) => {
+  const { ...passwordData } = req.body;
+  const result = await AuthServices.changePasswordIntoDB(
+    req.user,
+    passwordData
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Password is updated successfully',
+    data: result,
+  });
+});
+
+
 const resetPassword = catchAsync(async (req, res) => {
 
   const result = await AuthServices.resetPassword(req.body);
@@ -88,6 +104,7 @@ const resendVerifyCode = catchAsync(async (req, res) => {
 export const AuthControllers = {
   logInUser,
   forgetPassword,
+  changePassword,
   resendResetCode,
   resendVerifyCode,
   resetPassword,

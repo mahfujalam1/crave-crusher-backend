@@ -2,9 +2,21 @@ import { Router } from "express";
 import { AuthControllers } from "./auth-controller";
 import validateRequest from "../../middleware/validateRequest";
 import { authValidations } from "./auth-validation";
+import auth from "../../middleware/auth";
+import { USER_ROLE } from "../user/user-constant";
 
 const router = Router();
 router.post("/signin", validateRequest(authValidations.loginValidation), AuthControllers.logInUser);
+
+router.post(
+    '/change-password',
+    auth(
+        USER_ROLE.user,
+        USER_ROLE.admin
+    ),
+    validateRequest(authValidations.changePasswordValidationSchema),
+    AuthControllers.changePassword
+);
 
 router.post(
     '/forget-password',

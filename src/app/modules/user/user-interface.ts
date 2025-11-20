@@ -10,6 +10,7 @@ export type TUser = {
   password: string;
   isBlocked: boolean;
   verifyCode: number;
+  passwordChangedAt?: Date
   resetCode: number;
   isVerified: boolean;
   isResetVerified: boolean;

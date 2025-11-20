@@ -13,6 +13,17 @@ const forgetPasswordValidationSchema = z.object({
   }),
 });
 
+const changePasswordValidationSchema = z.object({
+  body: z.object({
+    oldPassword: z.string({ required_error: 'Old password is required' }),
+    newPassword: z.string({ required_error: 'Password is required' }),
+    confirmNewPassword: z.string({
+      required_error: 'Confirm password is required',
+    }),
+  }),
+});
+
+
 const verifyResetOtpValidationSchema = z.object({
   body: z.object({
     email: z.string({ required_error: 'Email is required' }),
@@ -47,5 +58,6 @@ export const authValidations = {
   forgetPasswordValidationSchema,
   resendResetCodeValidationSchema,
   resetPasswordValidationSchema,
-  verifyResetOtpValidationSchema
+  verifyResetOtpValidationSchema,
+  changePasswordValidationSchema
 };

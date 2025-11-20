@@ -13,6 +13,9 @@ const userSchema: Schema = new Schema(
     verifyCode: { type: Number, },
     resetCode: { type: Number },
     isVerified: { type: Boolean, default: false },
+    passwordChangedAt: {
+      type: Date,
+    },
     isResetVerified: { type: Boolean, default: false },
     codeExpireIn: { type: Date, default: null },
     isActive: { type: Boolean, default: true },
