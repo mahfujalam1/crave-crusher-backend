@@ -4,7 +4,7 @@ import validateRequest from "../../middleware/validateRequest";
 import { authValidations } from "./auth-validation";
 
 const router = Router();
-router.post("/login", validateRequest(authValidations.loginValidation), AuthControllers.logInUser);
+router.post("/signin", validateRequest(authValidations.loginValidation), AuthControllers.logInUser);
 
 router.post(
     '/forget-password',

@@ -39,15 +39,16 @@ const logInUserIntoDB = async (payload: TLogin) => {
     email: user!.email,
     role: user!.role as TUserRole,
   };
+  console.log(config)
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_screet as string,
-    config.jwt_access_expires_in as string
+    config.jwt_access_expires_in
   );
   const refreshToken = createToken(
     jwtPayload,
     config.jwt_access_screet as string,
-    config.jwt_access_expires_in as string
+    config.jwt_access_expires_in
   );
 
   
@@ -112,7 +113,7 @@ const verifyResetOtp = async (email: string, resetCode: number) => {
   if (user.codeExpireIn < new Date(Date.now())) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Reset code is expire');
   }
-  if (Number(user.resetCode) !== Number(resetCode)) {
+  if (user.resetCode !== Number(resetCode)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Reset code is invalid');
   }
   await User.findOneAndUpdate(
@@ -179,12 +180,12 @@ const resetPassword = async (payload: {
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_screet as string,
-    config.jwt_access_expires_in as string
+    config.jwt_access_expires_in 
   );
   const refreshToken = createToken(
     jwtPayload,
     config.jwt_access_screet as string,
-    config.jwt_access_expires_in as string
+    config.jwt_access_expires_in 
   );
 
   return { accessToken, refreshToken };

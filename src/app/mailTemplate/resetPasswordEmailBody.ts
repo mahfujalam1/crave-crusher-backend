@@ -17,7 +17,7 @@ const resetPasswordEmailBody = (name: string, resetCode: number) => `
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         .header {
-          background-color: #d9534f;
+          background-color: #6c63ff;
           padding: 20px;
           border-top-left-radius: 8px;
           border-top-right-radius: 8px;
@@ -47,7 +47,7 @@ const resetPasswordEmailBody = (name: string, resetCode: number) => `
         }
         .reset-code {
           font-size: 28px;
-          color: #d9534f;
+          color: #6c63ff;
           font-weight: 700;
           text-align: center;
           margin-bottom: 20px;
@@ -65,7 +65,7 @@ const resetPasswordEmailBody = (name: string, resetCode: number) => `
           margin: 5px 0;
         }
         .footer a {
-          color: #d9534f;
+          color: #6c63ff;
           text-decoration: none;
         }
         .footer a:hover {

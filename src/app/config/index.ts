@@ -10,7 +10,7 @@ export default {
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
   default_password: process.env.DEFAULT_PASSWORD,
   jwt_access_screet: process.env.JWT_ACCESS_SECRET,
-  jwt_access_expires_in: process.env.EXPIREIN,
+  jwt_access_expires_in: Number(process.env.EXPIREIN),
   signeture_key: process.env.SINGNETURE_KEY,
   smtp: {
     smtp_host: process.env.SMTP_HOST,
@@ -18,6 +18,6 @@ export default {
     smtp_service: process.env.SMTP_SERVICE,
     smtp_mail: process.env.SMTP_MAIL,
     smtp_pass: process.env.SMTP_PASS,
-    name: process.env.SERVICE_NAME,
+    name: process.env.SMTP_NAME,
   },
 };

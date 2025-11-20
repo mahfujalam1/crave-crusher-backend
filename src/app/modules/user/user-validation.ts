@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ENUM_USER_STATUS } from "../../utils/enum";
 
 // Define the schema
 const UserValidationSchema = z.object({
@@ -10,5 +11,89 @@ const UserValidationSchema = z.object({
   }),
 });
 
-export default UserValidationSchema;
+
+const loginValidationSchema = z.object({
+  body: z.object({
+    email: z.string({ required_error: 'Email is required' }),
+    password: z.string({ required_error: 'Password is required' }),
+  }),
+});
+
+
+const changePasswordValidationSchema = z.object({
+  body: z.object({
+    oldPassword: z.string({ required_error: 'Old password is required' }),
+    newPassword: z.string({ required_error: 'Password is required' }),
+  }),
+});
+
+
+// refresh token validation schema -----------
+const refreshTokenValidationSchema = z.object({
+  cookies: z.object({
+    refreshToken: z.string({ required_error: 'Refresh token is required' }),
+  }),
+});
+
+
+
+// forget password validation schema
+const forgetPasswordValidationSchema = z.object({
+  body: z.object({
+    email: z.string({ required_error: 'User email is required' }),
+  }),
+});
+
+
+// reset password validation schema
+const resetPasswordValidationSchema = z.object({
+  body: z.object({
+    email: z.string({ required_error: 'User email is required' }),
+    newPassword: z.string({ required_error: 'New password is required' }),
+  }),
+});
+
+
+
+const verifyCodeValidationSchema = z.object({
+  body: z.object({
+    email: z.string({ required_error: 'Email is required' }),
+    verifyCode: z.number({ required_error: 'Phone number is required' }),
+  }),
+});
+
+const resendVerifyCodeSchema = z.object({
+  body: z.object({
+    email: z.string({ required_error: 'Email is required' }),
+  }),
+});
+
+const changeUserStatus = z.object({
+  body: z.object({
+    status: z.enum(
+      Object.values(ENUM_USER_STATUS) as [string, ...string[]]
+    ),
+  }),
+});
+
+const deleteUserAccountValidationSchema = z.object({
+  body: z.object({
+    password: z.string({ required_error: 'Password is required' }),
+  }),
+});
+
+const userValidations = {
+  UserValidationSchema,
+  loginValidationSchema,
+  changePasswordValidationSchema,
+  refreshTokenValidationSchema,
+  forgetPasswordValidationSchema,
+  resetPasswordValidationSchema,
+  verifyCodeValidationSchema,
+  resendVerifyCodeSchema,
+  changeUserStatus,
+  deleteUserAccountValidationSchema,
+};
+
+export default userValidations;
 

@@ -10,8 +10,9 @@ const userSchema: Schema = new Schema(
     profileImage: { type: String, default: null },
     password: { type: String, required: true },
     isBlocked: { type: Boolean, default: false },
-    verifyCode: { type: String, default: '' },
+    verifyCode: { type: Number, },
     resetCode: { type: Number },
+    isVerified: { type: Boolean, default: false },
     isResetVerified: { type: Boolean, default: false },
     codeExpireIn: { type: Date, default: null },
     isActive: { type: Boolean, default: true },
@@ -21,7 +22,7 @@ const userSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-// Middleware for hashing password before saving
+
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 

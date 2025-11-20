@@ -95,21 +95,16 @@ const registrationSuccessEmailBody = (name: string, activationCode: number) => `
     <body>
       <div class="container">
         <div class="header">
-          <h1>Welcome to Cigarslounges</h1>
+          <h1>Welcome to Crave Crusher</h1>
         </div>
         <div class="content">
           <h2>Hello, ${name}</h2>
 
-          <p>Thank you for registering with Cigarslounges . To activate your account, please use the following activation code:</p>
+          <p>Thank you for registering with Crave Crusher . To activate your account, please use the following activation code:</p>
             <div class="activation-code">${activationCode || 'XXXXXX'}</div>
             <p>Enter this code on the activation page within the next 10 minutes. If you don't your account will be deleted from the database and you will need to register again.</p>
-            <div class="button-container">
-              <a href="https://yourwebsite.com/activate" class="button">
-                <span class="activate-btn">Activate Now</span>
-              </a>
-            </div>
             <p>If you didn't register, ignore this email.</p>
-          <p>If you have any questions, feel free to contact us at <a href="info@cigarslounges.com">info@cigarslounges.com</a>.</p>
+          <p>If you have any questions, feel free to contact us at <a href="info@cravecrusher.com">info@cravecrusher.com</a>.</p>
         </div>
         <div class="footer">
           <p>&copy; ${new Date().getFullYear()} Template. All rights reserved.</p>

@@ -3,15 +3,14 @@ import { USER_ROLE } from './user-constant';
 
 // Define the User type
 export type TUser = {
-  id: string;
   fullName: string;
   email: string;
   profileImage: string;
   role: 'admin' | 'user';
   password: string;
   isBlocked: boolean;
-  verifyCode: string;
-  resetCode: string;
+  verifyCode: number;
+  resetCode: number;
   isVerified: boolean;
   isResetVerified: boolean;
   codeExpireIn: Date;
