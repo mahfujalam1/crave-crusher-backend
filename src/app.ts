@@ -7,7 +7,9 @@ const app = express();
 
 app.use(express.json());
 const corsOptions = {
-  origin: '*',
+  origin: (origin:any, callback:any) => {
+    callback(null, true); // যেকোনো origin allow করবে
+  },
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204
@@ -20,7 +22,7 @@ app.use(
 app.use("/api/v1", router);
 
 const test = async (req: Request, res: Response) => {
-  res.send({ message: "Crave Crusher server is running" });
+  res.send("Crave Crusher server is running Successfully.");
 };
 
 app.get("/", test);
