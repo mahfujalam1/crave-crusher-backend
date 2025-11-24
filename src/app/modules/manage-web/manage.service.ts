@@ -5,7 +5,7 @@ import { Request } from 'express';
 import {
   AboutUs,
   // ContactUs,
-  // FAQ,
+  FAQ,
   // Partner,
   PrivacyPolicy,
   // Slider,
@@ -136,6 +136,9 @@ const addTermsConditions = async (payload: any) => {
 const getTermsConditions = async () => {
   return await TermsConditions.findOne();
 };
+
+
+
 const editTermsConditions = async (
   id: string,
   payload: { description: string },
@@ -150,6 +153,8 @@ const editTermsConditions = async (
   });
   return result;
 };
+
+
 const deleteTermsConditions = async (id: string) => {
   const isExist = await TermsConditions.findById(id);
   if (!isExist) {
@@ -157,6 +162,7 @@ const deleteTermsConditions = async (id: string) => {
   }
   return await TermsConditions.findByIdAndDelete(id);
 };
+
 
 //! Contact Us
 // const addContactUs = async (payload: any) => {
@@ -184,33 +190,33 @@ const deleteTermsConditions = async (id: string) => {
 //   return await ContactUs.findByIdAndDelete(id);
 // };
 // //! FAQ
-// const addFAQ = async (payload: any) => {
-//   return await FAQ.create(payload);
-// };
-// const getFAQ = async () => {
-//   return await FAQ.find({});
-// };
-// const editFAQ = async (
-//   id: string,
-//   payload: { question: string; answer: string },
-// ) => {
-//   const isExist = await FAQ.findById(id);
-//   if (!isExist) {
-//     throw new AppError(404, 'Faq not found');
-//   }
-//   const result = await FAQ.findOneAndUpdate({ _id: id }, payload, {
-//     new: true,
-//     runValidators: true,
-//   });
-//   return result;
-// };
-// const deleteFAQ = async (id: string) => {
-//   const isExist = await FAQ.findById(id);
-//   if (!isExist) {
-//     throw new AppError(404, 'Faq not found');
-//   }
-//   return await FAQ.findByIdAndDelete(id);
-// };
+const addFAQ = async (payload: any) => {
+  return await FAQ.create(payload);
+};
+const getFAQ = async () => {
+  return await FAQ.find({});
+};
+const editFAQ = async (
+  id: string,
+  payload: { question: string; answer: string },
+) => {
+  const isExist = await FAQ.findById(id);
+  if (!isExist) {
+    throw new AppError(404, 'Faq not found');
+  }
+  const result = await FAQ.findOneAndUpdate({ _id: id }, payload, {
+    new: true,
+    runValidators: true,
+  });
+  return result;
+};
+const deleteFAQ = async (id: string) => {
+  const isExist = await FAQ.findById(id);
+  if (!isExist) {
+    throw new AppError(404, 'Faq not found');
+  }
+  return await FAQ.findByIdAndDelete(id);
+};
 // //! Slider
 // const addSlider = async (req: Request) => {
 //   const { files, body } = req;
@@ -286,10 +292,10 @@ export const ManageService = {
   // deleteContactUs,
   deletePrivacyPolicy,
   deleteTermsConditions,
-  // addFAQ,
-  // getFAQ,
-  // editFAQ,
-  // deleteFAQ,
+  addFAQ,
+  getFAQ,
+  editFAQ,
+  deleteFAQ,
   // addSlider,
   // getSlider,
   // deleteSlider,

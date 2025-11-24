@@ -11,7 +11,7 @@ router.post(
   auth(USER_ROLE.admin),
   ManageController.addAboutUs,
 );
-// router.post('/add-faq', auth(USER_ROLE.admin), ManageController.addFAQ);
+router.post('/add-faq', auth(USER_ROLE.admin), ManageController.addFAQ);
 router.post(
   '/add-terms-conditions',
   auth(USER_ROLE.admin),
@@ -41,7 +41,7 @@ router.post(
 router.get('/get-privacy-policy', ManageController.getPrivacyPolicy);
 // router.get('/get-partner', ManageController.getPartner);
 // router.get('/get-slider', ManageController.getSlider);
-// router.get('/get-faq', ManageController.getFAQ);
+router.get('/get-faq', ManageController.getFAQ);
 router.get('/get-about-us', ManageController.getAboutUs);
 router.get('/get-terms-conditions', ManageController.getTermsConditions);
 // router.get('/get-contact-us', ManageController.getContactUs);
@@ -61,11 +61,11 @@ router.patch(
 //   uploadFile(),
 //   ManageController.editSlider,
 // );
-// router.patch(
-//   '/edit-faq/:id',
-//   auth(USER_ROLE.admin),
-//   ManageController.editFAQ,
-// );
+router.patch(
+  '/edit-faq/:id',
+  auth(USER_ROLE.admin),
+  ManageController.editFAQ,
+);
 router.patch(
   '/edit-about-us/:id',
   auth(USER_ROLE.admin),
@@ -93,21 +93,21 @@ router.delete(
 //   auth(USER_ROLE.admin),
 //   ManageController.deleteSlider,
 // );
-// router.delete(
-//   '/delete-faq/:id',
-//   auth(USER_ROLE.admin),
-//   ManageController.deleteFAQ,
-// );
+router.delete(
+  '/delete-faq/:id',
+  auth(USER_ROLE.admin),
+  ManageController.deleteFAQ,
+);
 // router.delete(
 //   '/delete-contact-us/:id',
 //   auth(USER_ROLE.admin),
 //   ManageController.deleteContactUs,
 // );
-// router.delete(
-//   '/delete-privacy-policy/:id',
-//   auth(USER_ROLE.admin),
-//   ManageController.deletePrivacyPolicy,
-// );
+router.delete(
+  '/delete-privacy-policy/:id',
+  auth(USER_ROLE.admin),
+  ManageController.deletePrivacyPolicy,
+);
 // router.delete(
 //   '/delete-partner/:id',
 //   auth(USER_ROLE.admin),

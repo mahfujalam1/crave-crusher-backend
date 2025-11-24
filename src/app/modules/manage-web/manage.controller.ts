@@ -53,15 +53,15 @@ const addTermsConditions = catchAsync(async (req: Request, res: Response) => {
 //     data: result,
 //   });
 // });
-// const addFAQ = catchAsync(async (req: Request, res: Response) => {
-//   const result = await ManageService.addFAQ(req.body);
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'FAQ added successfully',
-//     data: result,
-//   });
-// });
+const addFAQ = catchAsync(async (req: Request, res: Response) => {
+  const result = await ManageService.addFAQ(req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'FAQ added successfully',
+    data: result,
+  });
+});
 const getPrivacyPolicy = catchAsync(async (req: Request, res: Response) => {
   const result = await ManageService.getPrivacyPolicy();
   sendResponse(res, {
@@ -107,15 +107,15 @@ const getTermsConditions = catchAsync(async (req: Request, res: Response) => {
 //     data: result,
 //   });
 // });
-// const getFAQ = catchAsync(async (req: Request, res: Response) => {
-//   const result = await ManageService.getFAQ();
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'FAQ retrieved successfully',
-//     data: result,
-//   });
-// });
+const getFAQ = catchAsync(async (req: Request, res: Response) => {
+  const result = await ManageService.getFAQ();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'FAQ retrieved successfully',
+    data: result,
+  });
+});
 const editPrivacyPolicy = catchAsync(async (req: Request, res: Response) => {
   const result = await ManageService.editPrivacyPolicy(req.params.id, req.body);
   sendResponse(res, {
@@ -164,15 +164,15 @@ const editTermsConditions = catchAsync(async (req: Request, res: Response) => {
 //     data: result,
 //   });
 // });
-// const editFAQ = catchAsync(async (req: Request, res: Response) => {
-//   const result = await ManageService.editFAQ(req.params.id, req.body);
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'FAQ updated successfully',
-//     data: result,
-//   });
-// });
+const editFAQ = catchAsync(async (req: Request, res: Response) => {
+  const result = await ManageService.editFAQ(req.params.id, req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'FAQ updated successfully',
+    data: result,
+  });
+});
 const deleteAboutUs = catchAsync(async (req: Request, res: Response) => {
   const result = await ManageService.deleteAboutUs(req.params.id);
   sendResponse(res, {
@@ -209,15 +209,15 @@ const deletePrivacyPolicy = catchAsync(async (req: Request, res: Response) => {
 //     data: result,
 //   });
 // });
-// const deleteFAQ = catchAsync(async (req: Request, res: Response) => {
-//   const result = await ManageService.deleteFAQ(req.params.id);
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'FAQ deleted successfully',
-//     data: result,
-//   });
-// });
+const deleteFAQ = catchAsync(async (req: Request, res: Response) => {
+  const result = await ManageService.deleteFAQ(req.params.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'FAQ deleted successfully',
+    data: result,
+  });
+});
 
 // const deleteSlider = catchAsync(async (req: Request, res: Response) => {
 //   const result = await ManageService.deleteSlider(req.params.id);
@@ -288,10 +288,10 @@ export const ManageController = {
   // deleteContactUs,
   deletePrivacyPolicy,
   deleteTermsConditions,
-  // addFAQ,
-  // getFAQ,
-  // deleteFAQ,
-  // editFAQ,
+  addFAQ,
+  getFAQ,
+  deleteFAQ,
+  editFAQ,
   // addPartner,
   // getPartner,
   // editPartner,

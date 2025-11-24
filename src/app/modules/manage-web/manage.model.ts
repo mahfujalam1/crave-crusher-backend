@@ -79,24 +79,25 @@ const termsAndConditionsSchema = new mongoose.Schema(
 //   },
 // );
 // //!FAQ
-// const faqSchema = new mongoose.Schema(
-//   {
-//     question: {
-//       type: String,
-//       required: true,
-//     },
-//     answer: {
-//       type: String,
-//       required: true,
-//     },
-//   },
-//   {
-//     timestamps: true,
-//     toJSON: {
-//       virtuals: true,
-//     },
-//   },
-// );
+const faqSchema = new mongoose.Schema(
+  {
+    question: {
+      type: String,
+      required: true,
+    },
+    answer: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+    },
+  },
+);
+
 // //!Slider
 // const sliderSchema = new mongoose.Schema(
 //   {
@@ -124,6 +125,6 @@ export const TermsConditions = model(
   termsAndConditionsSchema,
 );
 // export const ContactUs = model('ContactUs', contactUsSchema);
-// export const FAQ = model('FAQ', faqSchema);
+export const FAQ = model('FAQ', faqSchema);
 // export const Slider = model('Slider', sliderSchema);
 // export const Partner = model('Partner', partnerSchema);
