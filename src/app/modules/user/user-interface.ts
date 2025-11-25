@@ -6,7 +6,7 @@ export type TUser = {
   fullName: string;
   email: string;
   profileImage: string;
-  role: 'admin' | 'user';
+  role?: 'admin' | 'user';
   password: string;
   isBlocked: boolean;
   verifyCode: number;
@@ -22,7 +22,7 @@ export type TUser = {
 
 // Define the UserModel interface, which includes static methods
 export interface UserModel extends Model<TUser> {
-  isPasswordMatched(plainPassword: string, hashPassword: string): Promise<boolean>;
+  isPasswordMatched(plainPassword: string, hashPassword: string): Promise<TUser>;
   isJWTIssuedBeforePasswordChange(
     passwordChangeTimeStamp: Date,
     jwtIssuedTimeStamp: number

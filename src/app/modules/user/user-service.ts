@@ -8,6 +8,7 @@ import { USER_ROLE } from "./user-constant";
 import { JwtPayload } from "jsonwebtoken";
 import { createToken } from "./user.utils";
 import config from "../../config";
+import { PostServices } from "../community/post.service";
 
 const generateVerifyCode = (): number => {
   return Math.floor(100000 + Math.random() * 900000);
@@ -125,9 +126,20 @@ const resendVerifyCode = async (email: string) => {
 };
 
 const getMyProfile = async (userData: JwtPayload) => {
+  // Fetch the user profile, excluding the password field
   const result = await User.findOne({ email: userData.email }).select('-password');
 
-  return result;
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  // Fetch all posts created by this user
+  const posts = await PostServices.getPostsByUser(userData.id);
+
+  return {
+    user: result,
+    posts,
+  };
 };
 
 // const updateProfile = async (userData: JwtPayload, payload: any) => {

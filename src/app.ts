@@ -3,12 +3,13 @@ import cors from "cors";
 import notFound from "./app/middleware/notFoundRoute";
 import router from "./app/routes";
 import errorMiddleware from "./app/middleware/globalErrorHandler";
+import User from "./app/modules/user/user-model";
 const app = express();
 
 app.use(express.json());
 const corsOptions = {
   origin: (origin:any, callback:any) => {
-    callback(null, true); // যেকোনো origin allow করবে
+    callback(null, true);
   },
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
@@ -19,11 +20,15 @@ app.use(
   cors(corsOptions)
 );
 
+app.use('/uploads', express.static('uploads'));
 app.use("/api/v1", router);
 
 const test = async (req: Request, res: Response) => {
+  const user = await User.findOne()
+  console.log(user)
   res.send("Crave Crusher server is running Successfully.");
 };
+
 
 app.get("/", test);
 

@@ -1,12 +1,13 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { TUser, UserModel } from './user-interface';
 import bcrypt from 'bcrypt';
+import config from '../../config';
 
 const userSchema: Schema = new Schema(
   {
     fullName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    role: { type: String, enum: ['admin', 'user'], required: true },
+    role: { type: String, enum: ['admin', 'user'], default: 'user' },
     profileImage: { type: String, default: null },
     password: { type: String, required: true },
     isBlocked: { type: Boolean, default: false },
@@ -27,16 +28,15 @@ const userSchema: Schema = new Schema(
 
 
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-
-  try {
-    const salt = await bcrypt.genSalt(15);
-    const hashedPassword = await bcrypt.hash(this.password as string, salt);
-    this.password = hashedPassword;
-    next();
-  } catch (error: any) {
-    next(error);
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user = this;
+  if (user.password) {
+    user.password = await bcrypt.hash(
+      user.password as string,
+      Number(config.bcrypt_salt_rounds)
+    );
   }
+  next();
 });
 
 // Remove the password from the response after saving
