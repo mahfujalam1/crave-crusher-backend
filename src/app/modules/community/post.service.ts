@@ -20,42 +20,35 @@ const updatePostIntoDB = async (
     deleted_images: string[],
     authorId: string
 ) => {
-    // Fetch the post by ID
     const post = await Post.findById(id);
     if (!post) {
         throw new AppError(httpStatus.NOT_FOUND, 'Post not found');
     }
 
-    // Check if the user is authorized to update the post
+
     if (post.authorId.toString() !== authorId) {
         throw new AppError(httpStatus.FORBIDDEN, "You are not authorized to update this post");
     }
 
-    // 1. Handle the image deletion logic
     if (deleted_images.length > 0) {
         deleted_images.forEach((imageUrl: string) => {
-            // Check if the image exists in the current post images array
             const imageIndex = post.post_images.indexOf(imageUrl);
             if (imageIndex > -1) {
-                // If the image is found in the post images, remove it from the database
-                post.post_images.splice(imageIndex, 1); // Remove from post's images array
+                post.post_images.splice(imageIndex, 1);
 
-                // Now, delete the image from the file system
-                const imagePath = path.resolve(imageUrl); // Get the full path to the image
+                const imagePath = path.resolve(imageUrl);
                 if (fs.existsSync(imagePath)) {
-                    fs.unlinkSync(imagePath); // Delete the image from file system
+                    fs.unlinkSync(imagePath);
                 }
             }
         });
     }
 
-    // 2. Handle adding new images to the post
+
     if (payload.post_images) {
-        // Add the new images to the post's images array
         post.post_images = [...post.post_images, ...payload.post_images];
     }
 
-    // 3. Update the other fields of the post if any
     if (payload.content) {
         post.content = payload.content;
     }
@@ -68,7 +61,7 @@ const updatePostIntoDB = async (
 const getPostById = async (postId: string, userId: string) => {
     const post = await Post.aggregate([
         {
-            $match: { _id: new mongoose.Types.ObjectId(postId) }
+            $match: { _id: new mongoose.Types.ObjectId(postId), isDeleted: false }
         },
         {
             $lookup: {
@@ -119,6 +112,12 @@ const getAllPosts = async (userId: string) => {
                 }
             }
         },
+        // Match only posts that are not deleted
+        {
+            $match: {
+                isDeleted: false
+            }
+        },
         {
             $project: {
                 content: 1,
@@ -133,15 +132,22 @@ const getAllPosts = async (userId: string) => {
         }
     ]);
 
+    // Check if any posts were found
+    if (posts.length === 0) {
+        return { message: 'No posts found.' };  // Or return an empty array []
+    }
+
     return posts;
 };
+
 
 const getMyPosts = async (userId: string) => {
     const posts = await Post.aggregate([
         // Filter posts by authorId (userId)
         {
             $match: {
-                authorId: new mongoose.Types.ObjectId(userId)
+                authorId: new mongoose.Types.ObjectId(userId),
+                isDeleted: false
             }
         },
         // Fetch all votes related to the posts

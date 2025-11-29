@@ -30,7 +30,7 @@ const logInUserIntoDB = async (payload: TLogin) => {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked');
   }
 
- 
+
   // checking if the password is correct ----
   if (!(await User.isPasswordMatched(payload?.password, user?.password))) {
     throw new AppError(httpStatus.FORBIDDEN, 'Password do not match');
@@ -54,7 +54,7 @@ const logInUserIntoDB = async (payload: TLogin) => {
 
 
   return {
-    id:user?._id,
+    id: user?._id,
     accessToken,
     refreshToken,
   };
@@ -107,7 +107,26 @@ const changePasswordIntoDB = async (
       passwordChangedAt: new Date(),
     }
   );
-  return null;
+
+  const jwtPayload = {
+    id: String(user!._id),
+    email: user!.email,
+    role: user!.role as TUserRole,
+  };
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_screet as string,
+    config.jwt_access_expires_in
+  );
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_access_screet as string,
+    config.jwt_access_expires_in
+  );
+  return {
+    accessToken,
+    refreshToken,
+  };
 };
 
 
