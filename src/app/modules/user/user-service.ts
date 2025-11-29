@@ -4,7 +4,6 @@ import AppError from "../../error/appError";
 import User from "./user-model";
 import sendEmail from "../../utils/sendEmail";
 import registrationSuccessEmailBody from "../../mailTemplate/registerSucessEmail";
-import { USER_ROLE } from "./user-constant";
 import { JwtPayload } from "jsonwebtoken";
 import { createToken } from "./user.utils";
 import config from "../../config";
@@ -126,92 +125,37 @@ const resendVerifyCode = async (email: string) => {
 };
 
 const getMyProfile = async (userData: JwtPayload) => {
-  // Fetch the user profile, excluding the password field
+
   const result = await User.findOne({ email: userData.email }).select('-password');
 
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  // Fetch all posts created by this user
-  const posts = await PostServices.getPostsByUser(userData.id);
-
-  return {
-    user: result,
-    posts,
-  };
+  return result;
 };
 
-// const updateProfile = async (userData: JwtPayload, payload: any) => {
-//   if (userData.role === USER_ROLE.user) {
-//     const user = await NormalUser.findById(userData.profileId);
-//     if (!user) {
-//       throw new AppError(httpStatus.NOT_FOUND, 'User not found');
-//     }
 
-//     // If profile image exists and a new one is uploaded — delete the old one
-//     if (user.profile_image && payload.profile_image) {
-//       await deleteFileFromS3(user.profile_image);
-//     }
+const updateProfile = async (id: string, imageUrl: string | undefined, fullName: string) => {
+  const user = await User.findById(id);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
 
-//     const result = await NormalUser.findByIdAndUpdate(
-//       userData.profileId,
-//       payload,
-//       { new: true, runValidators: true }
-//     );
+  user.fullName = fullName;
+  if (imageUrl) {
+    user.profileImage = imageUrl;
+  }
 
-//     return result;
-//   }
+  await user.save();
 
-//   // Organizer Profile Update
-//   else if (userData.role === USER_ROLE.organizer) {
-//     const organizer = await Organizer.findById(userData.profileId);
-//     if (!organizer) {
-//       throw new AppError(httpStatus.NOT_FOUND, 'Organizer not found');
-//     }
-
-//     if (organizer.profile_image && payload.profile_image) {
-//       await deleteFileFromS3(organizer.profile_image);
-//     }
-
-//     const result = await Organizer.findByIdAndUpdate(
-//       userData.profileId,
-//       payload,
-//       { new: true, runValidators: true }
-//     );
-
-//     return result;
-//   }
-
-//   // Super Admin Profile Update
-//   else if (userData.role === USER_ROLE.admin) {
-//     const superAdmin = await SuperAdmin.findById(userData.profileId);
-//     if (!superAdmin) {
-//       throw new AppError(httpStatus.NOT_FOUND, 'Super Admin not found');
-//     }
-
-//     if (superAdmin.profile_image && payload.profile_image) {
-//       await deleteFileFromS3(superAdmin.profile_image);
-//     }
-
-//     const result = await SuperAdmin.findByIdAndUpdate(
-//       userData.profileId,
-//       payload,
-//       { new: true, runValidators: true }
-//     );
-
-//     return result;
-//   }
-
-//   // Invalid role
-//   else {
-//     throw new AppError(httpStatus.FORBIDDEN, 'Invalid user role');
-//   }
-// };
+  return user;
+};
 
 export const UserServices = {
   createUserIntoDB,
   getMyProfile,
   resendVerifyCode,
   verifyCode,
+  updateProfile
 };

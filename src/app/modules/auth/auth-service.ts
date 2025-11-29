@@ -54,6 +54,7 @@ const logInUserIntoDB = async (payload: TLogin) => {
 
 
   return {
+    id:user?._id,
     accessToken,
     refreshToken,
   };

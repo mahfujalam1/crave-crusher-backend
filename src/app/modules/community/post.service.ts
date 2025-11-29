@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { Vote } from '../vote/vote.model';
 import { Comment } from '../comment/comment.model';
+import mongoose from 'mongoose';
 
 const createPostIntoDB = async (payload: Partial<IPost>) => {
     const post = new Post(payload);
@@ -64,59 +65,121 @@ const updatePostIntoDB = async (
     return updatedPost;
 };
 
-const getPostById = async (postId: string) => {
-    const post = await Post.findById(postId).populate({
-        path: "authorId",
-        select: 'fullName email profileImage'
-    });
+const getPostById = async (postId: string, userId: string) => {
+    const post = await Post.aggregate([
+        {
+            $match: { _id: new mongoose.Types.ObjectId(postId) }
+        },
+        {
+            $lookup: {
+                from: 'votes',
+                localField: '_id',
+                foreignField: 'postId',
+                as: 'votes'
+            }
+        },
+        {
+            $addFields: {
+                hasVoted: {
+                    $in: [new mongoose.Types.ObjectId(userId), { $map: { input: "$votes", as: "vote", in: "$$vote.userId" } }]
+                }
+            }
+        },
+        {
+            $project: {
+                content: 1,
+                post_images: 1,
+                totalVotes: 1,
+                totalComments: 1,
+                isDeleted: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                hasVoted: 1
+            }
+        }
+    ]);
 
-    if (!post) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Post not found');
-    }
-
-    const comments = await Comment.find({ postId }).populate({
-        path: 'authorId',
-        select: 'fullName profileImage'
-    });
-
-    const votes = await Vote.find({ postId }).populate({
-        path: 'userId',
-        select: 'fullName email profileImage'
-    });
-
-    return { post, comments, votes };
+    return post[0] || null;
 };
 
-const getAllPosts = async () => {
-    // Fetch all posts
-    const posts = await Post.find({ isDeleted: false }).populate({
-        path: "authorId",
-        select: 'fullName email profileImage'
-    });
+const getAllPosts = async (userId: string) => {
+    const posts = await Post.aggregate([
+        {
+            $lookup: {
+                from: 'votes',
+                localField: '_id',
+                foreignField: 'postId',
+                as: 'votes'
+            }
+        },
+        {
+            $addFields: {
+                hasVoted: {
+                    $in: [new mongoose.Types.ObjectId(userId), { $map: { input: "$votes", as: "vote", in: "$$vote.userId" } }]
+                }
+            }
+        },
+        {
+            $project: {
+                content: 1,
+                post_images: 1,
+                totalVotes: 1,
+                totalComments: 1,
+                isDeleted: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                hasVoted: 1
+            }
+        }
+    ]);
 
-    // Fetch comments and votes for each post
-    const postsWithCommentsAndVotes = await Promise.all(posts.map(async (post) => {
-        // Fetch comments for this post
-        const comments = await Comment.find({ postId: post._id }).populate({
-            path: 'authorId',
-            select: 'fullName profileImage'
-        });
-
-        // Fetch votes for this post
-        const votes = await Vote.find({ postId: post._id }).populate({
-            path: 'userId',
-            select: 'fullName email profileImage'
-        });
-
-        return {
-            ...post.toObject(),
-            comments,
-            votes
-        };
-    }));
-
-    return postsWithCommentsAndVotes;
+    return posts;
 };
+
+const getMyPosts = async (userId: string) => {
+    const posts = await Post.aggregate([
+        // Filter posts by authorId (userId)
+        {
+            $match: {
+                authorId: new mongoose.Types.ObjectId(userId)
+            }
+        },
+        // Fetch all votes related to the posts
+        {
+            $lookup: {
+                from: 'votes',  // Join with the 'votes' collection
+                localField: '_id',  // Field from 'Post' collection
+                foreignField: 'postId',  // Field from 'Vote' collection
+                as: 'votes'  // Create an array of votes
+            }
+        },
+        // Add a 'hasVoted' field to each post
+        {
+            $addFields: {
+                hasVoted: {
+                    $in: [new mongoose.Types.ObjectId(userId), { $map: { input: "$votes", as: "vote", in: "$$vote.userId" } }]
+                }
+            }
+        },
+        // Specify the fields you want in the result
+        {
+            $project: {
+                content: 1,
+                post_images: 1,
+                totalVotes: 1,
+                totalComments: 1,
+                isDeleted: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                hasVoted: 1  // Include hasVoted in the result
+            }
+        }
+    ]);
+
+    return posts;
+};
+
+
 
 const deletePostFormDB = async (id: string,) => {
     const post = await Post.findOne({ _id: id, isDeleted: false })
@@ -162,5 +225,6 @@ export const PostServices = {
     getAllPosts,
     updatePostIntoDB,
     deletePostFormDB,
-    getPostsByUser
+    getPostsByUser,
+    getMyPosts
 }

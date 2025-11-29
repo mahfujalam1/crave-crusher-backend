@@ -26,7 +26,7 @@ const createPost = catchAsync(async (req: Request, res: Response) => {
 
 const updatePost = catchAsync(async (req: Request, res: Response) => {
     const { files, body } = req;
-    const { id } = req.params;
+    const { postId } = req.params;
 
     const token = req.user;
     const deleted_images: string[] = JSON.parse(body.deleted_images || '[]');
@@ -37,7 +37,7 @@ const updatePost = catchAsync(async (req: Request, res: Response) => {
     }
 
     // Call service function to update the post and handle image deletion
-    const result = await PostServices.updatePostIntoDB(id, body, deleted_images, token?.id);
+    const result = await PostServices.updatePostIntoDB(postId, body, deleted_images, token?.id);
 
     // Respond with the updated post data
     sendResponse(res, {
@@ -52,7 +52,8 @@ const updatePost = catchAsync(async (req: Request, res: Response) => {
 
 const getPostById = catchAsync(async (req: Request, res: Response) => {
     const { postId } = req.params;
-    const post = await PostServices.getPostById(postId);
+    const token = req.user
+    const post = await PostServices.getPostById(postId, token?.id);
     if (!post) {
         return res.status(404).json({ success: false, message: 'Post not found' });
     }
@@ -66,7 +67,8 @@ const getPostById = catchAsync(async (req: Request, res: Response) => {
 
 
 const getAllPosts = catchAsync(async (req: Request, res: Response) => {
-    const posts = await PostServices.getAllPosts();
+    const token = req.user
+    const posts = await PostServices.getAllPosts(token?.id);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -77,8 +79,21 @@ const getAllPosts = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const getMyPosts = catchAsync(async (req: Request, res: Response) => {
+    const token = req.user
+    const posts = await PostServices.getMyPosts(token?.id);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "My all posts retrieved successfully",
+        data: posts,
+    });
+});
+
+
 const deletePost = catchAsync(async (req: Request, res: Response) => {
-    const {postId} = req.params
+    const { postId } = req.params
 
     const result = await PostServices.deletePostFormDB(postId)
 
@@ -95,5 +110,6 @@ export const PostControllers = {
     getPostById,
     getAllPosts,
     updatePost,
-    deletePost
+    deletePost,
+    getMyPosts
 }

@@ -65,24 +65,28 @@ const getMyProfile = catchAsync(async (req, res) => {
 
 
 
-// const updateProfile = catchAsync(async (req, res) => {
-//   const file: any = req.files?.profile_image;
-//   if (req.files?.profile_image) {
-//     req.body.profile_image = getCloudFrontUrl(file[0].key);
-//   }
-//   const result = await UserServices.updateProfile(req.user, req.body);
+const updateProfile = catchAsync(async (req, res) => {
+  const {files} = req;
+  const {fullName} = req.body;
+  let imageUrl;
+  if (files && !Array.isArray(files) && files.profileImage && files.profileImage[0]) {
+    imageUrl = files.profileImage[0].path;
+  }
+  const token = req.user;
+  const result = await UserServices.updateProfile(token?.id, imageUrl, fullName);
 
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Successfully update your profile',
-//     data: result,
-//   });
-// });
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Successfully update your profile',
+    data: result,
+  });
+});
 
 export const UserControllers = {
   createUser,
   verifyCode,
-  resendVerifyCode, 
-  getMyProfile
+  resendVerifyCode,
+  getMyProfile,
+  updateProfile
 };

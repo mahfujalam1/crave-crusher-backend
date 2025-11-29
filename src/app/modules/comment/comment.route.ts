@@ -11,6 +11,9 @@ router.post('/comment/:postId', auth(USER_ROLE.user, USER_ROLE.admin), CommentCo
 // Edit comment
 router.put('/comment/:commentId', auth(USER_ROLE.user, USER_ROLE.admin), CommentControllers.editComment);
 
+// Get all comment for a post
+router.get('/comment/:postId', auth(USER_ROLE.admin, USER_ROLE.user), CommentControllers.getAllCommentSignlePost)
+
 // Delete comment
 router.delete('/comment/:commentId', auth(USER_ROLE.user, USER_ROLE.admin), CommentControllers.deleteComment);
 

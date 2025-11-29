@@ -21,7 +21,7 @@ router.post('/create-post',
     PostControllers.createPost
 );
 
-router.patch('/update-post/:id',
+router.patch('/update-post/:postId',
     auth(USER_ROLE.user),
     uploadFile(),
     (req: Request, res: Response, next: NextFunction) => {
@@ -34,12 +34,15 @@ router.patch('/update-post/:id',
     PostControllers.updatePost
 );
 
-router.get('/post/:postId', PostControllers.getPostById);
+router.get('/post/:postId', auth(USER_ROLE.admin, USER_ROLE.user), PostControllers.getPostById);
 
 
 router.delete('/post/:postId', auth(USER_ROLE.admin, USER_ROLE.user), PostControllers.deletePost);
 
 
-router.get('/posts', PostControllers.getAllPosts);
+router.get('/posts', auth(USER_ROLE.admin, USER_ROLE.user), PostControllers.getAllPosts);
+
+// Get my all posts
+router.get('/my-posts', auth(USER_ROLE.user), PostControllers.getMyPosts )
 
 export const CommunityRoutes = router;

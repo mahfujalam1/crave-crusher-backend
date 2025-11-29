@@ -33,7 +33,8 @@ const allVoteForSinglePost = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+
 export const VoteControllers = {
     votePost,
-    allVoteForSinglePost
+    allVoteForSinglePost,
 }

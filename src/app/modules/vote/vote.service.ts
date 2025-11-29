@@ -17,11 +17,8 @@ const createVote = async (payload: any) => {
 };
 
 
-const getAllVoteAPost=async (postId:string) =>{
-    const votes = await Vote.find().populate({
-        path: "userId",
-        select: "fullName profileImage email"
-    })
+const getAllVoteAPost = async (postId: string) => {
+    const votes = await Vote.find({postId})
     return votes
 }
 

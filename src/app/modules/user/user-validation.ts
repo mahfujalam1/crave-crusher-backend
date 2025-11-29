@@ -11,6 +11,14 @@ const UserValidationSchema = z.object({
 });
 
 
+const updateProfileValidationSchema = z.object({
+  body: z.object({
+    fullName: z.string().min(2, { message: 'full Name is required' }),
+    profileImage: z.string().optional(),
+  }),
+});
+
+
 const loginValidationSchema = z.object({
   body: z.object({
     email: z.string({ required_error: 'Email is required' }),
@@ -92,6 +100,7 @@ const userValidations = {
   resendVerifyCodeSchema,
   changeUserStatus,
   deleteUserAccountValidationSchema,
+  updateProfileValidationSchema
 };
 
 export default userValidations;

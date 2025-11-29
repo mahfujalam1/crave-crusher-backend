@@ -8,7 +8,7 @@ export const uploadFile = () => {
     destination: function (req, file, cb) {
       let uploadPath = '';
 
-      if (file.fieldname === 'profile_image') {
+      if (file.fieldname === 'profileImage') {
         uploadPath = 'uploads/images/profile';
       } else if (file.fieldname === 'post_images') {
         uploadPath = 'uploads/images/post_images';
@@ -42,7 +42,7 @@ export const uploadFile = () => {
 
   const fileFilter = (req: Request, file: any, cb: any) => {
     const allowedFieldnames = [
-      'profile_image',
+      'profileImage',
       'post_images',
       'battle_images',
     ];
@@ -70,7 +70,7 @@ export const uploadFile = () => {
     storage: storage,
     fileFilter: fileFilter,
   }).fields([
-    { name: 'profile_image', maxCount: 1 },
+    { name: 'profileImage', maxCount: 1 },
     { name: 'post_images', maxCount: 5 },
     { name: 'battle_images', maxCount: 1 }
   ]);

@@ -7,6 +7,7 @@ const router = Router();
 router.post('/vote/:postId', auth(USER_ROLE.admin, USER_ROLE.user), VoteControllers.votePost);
 
 // all votes for a post
-router.get('/votes/:postId', VoteControllers.allVoteForSinglePost);
+router.get('/votes/:postId', auth(USER_ROLE.admin, USER_ROLE.user),  VoteControllers.allVoteForSinglePost);
+
 
 export const VoteRoutes = router;

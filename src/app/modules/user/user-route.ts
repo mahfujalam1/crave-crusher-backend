@@ -5,6 +5,7 @@ import UserValidationSchema from "./user-validation";
 import { USER_ROLE } from "./user-constant";
 import userValidations from "./user-validation";
 import auth from "../../middleware/auth";
+import { uploadFile } from "../../helper/fileUploader";
 
 const router = Router();
 
@@ -20,6 +21,14 @@ router.post(
     '/resend-verify-code',
     validateRequest(userValidations.resendVerifyCodeSchema),
     UserControllers.resendVerifyCode
+);
+
+
+router.patch(
+    '/update-profile',
+    auth(USER_ROLE.user),
+    uploadFile(),
+    UserControllers.updateProfile
 );
 
 router.get(

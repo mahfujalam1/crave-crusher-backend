@@ -44,8 +44,14 @@ const deleteComment = async (commentId: string) => {
     return { message: 'Comment deleted successfully' };
 };
 
+const getCommentsSinglePost= async(postId:string)=>{
+    const comments = await Comment.find({postId})
+    return comments
+}
+
 export const CommentServices = {
     createComment,
     editComment,
     deleteComment,
+    getCommentsSinglePost
 };

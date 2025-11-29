@@ -47,8 +47,23 @@ const deleteComment = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+
+const getAllCommentSignlePost = catchAsync(async (req: Request, res: Response) => {
+    const { postId } = req.params;
+
+    const result = await CommentServices.getCommentsSinglePost(postId);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Comments retrieved successfully",
+        data: result,
+    });
+});
+
 export const CommentControllers = {
     createComment,
     editComment,
     deleteComment,
+    getAllCommentSignlePost
 };
