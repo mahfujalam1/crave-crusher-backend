@@ -4,6 +4,7 @@ import { AuthRotues } from '../modules/auth/auth-route';
 import { CommunityRoutes } from '../modules/community/post.route';
 import { VoteRoutes } from '../modules/vote/vote.route';
 import { CommentRoutes } from '../modules/comment/comment.route';
+import { ManageRoutes } from '../modules/manage-web/manage.routes';
 
 const router = Router();
 
@@ -27,6 +28,10 @@ const moduleRoutes = [
   {
     path: '/community-comment',
     route: CommentRoutes,
+  },
+  {
+    path: '/manage-web',
+    route: ManageRoutes,
   },
 ];
 

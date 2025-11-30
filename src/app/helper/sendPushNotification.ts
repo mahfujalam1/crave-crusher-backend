@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
-import { User } from '../modules/user/user.model';
+import User from '../modules/user/user-model';
 
 const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID!;
 const ONESIGNAL_API_KEY = process.env.ONESIGNAL_API_KEY!;

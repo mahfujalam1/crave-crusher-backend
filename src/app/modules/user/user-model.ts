@@ -21,7 +21,7 @@ const userSchema: Schema = new Schema(
     codeExpireIn: { type: Date, default: null },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
+    playerIds: { type: [String], default: [] },
   },
   { timestamps: true }
 );

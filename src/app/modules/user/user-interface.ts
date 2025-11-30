@@ -17,7 +17,7 @@ export type TUser = {
   codeExpireIn: Date;
   isActive: boolean;
   isDeleted: boolean;
-  createdAt: Date;
+  playerIds: string[];
 };
 
 // Define the UserModel interface, which includes static methods
