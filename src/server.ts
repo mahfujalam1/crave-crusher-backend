@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Server } from "http";
 import config from "./app/config";
 import app from "./app";
+import { startCronJobs } from "./app/modules/cron";
 let server: Server | null = null;
 
 async function main() {
@@ -31,3 +32,5 @@ process.on("uncaughtException", () => {
   console.log(`uncaughtException on is detected, sutting down server`);
   process.exit(1);
 });
+
+startCronJobs();

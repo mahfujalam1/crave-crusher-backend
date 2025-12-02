@@ -79,6 +79,20 @@ const getPostById = async (postId: string, userId: string) => {
             }
         },
         {
+            $lookup: {
+                from: 'users',
+                localField: 'authorId',
+                foreignField: '_id',
+                as: 'author'
+            }
+        },
+        {
+            $unwind: {
+                path: "$author",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
             $project: {
                 content: 1,
                 post_images: 1,
@@ -87,13 +101,20 @@ const getPostById = async (postId: string, userId: string) => {
                 isDeleted: 1,
                 createdAt: 1,
                 updatedAt: 1,
-                hasVoted: 1
+                hasVoted: 1,
+                author: {
+                    _id: 1,
+                    fullName: 1,
+                    email: 1,
+                    profileImage: 1
+                }
             }
         }
     ]);
 
     return post[0] || null;
 };
+
 
 const getAllPosts = async (userId: string) => {
     const posts = await Post.aggregate([
@@ -119,6 +140,20 @@ const getAllPosts = async (userId: string) => {
             }
         },
         {
+            $lookup: {
+                from: 'users',
+                localField: 'authorId', 
+                foreignField: '_id',
+                as: 'author'
+            }
+        },
+        {
+            $unwind: {
+                path: "$author", 
+                preserveNullAndEmptyArrays: true 
+            }
+        },
+        {
             $project: {
                 content: 1,
                 post_images: 1,
@@ -127,7 +162,13 @@ const getAllPosts = async (userId: string) => {
                 isDeleted: 1,
                 createdAt: 1,
                 updatedAt: 1,
-                hasVoted: 1
+                hasVoted: 1,
+                author: {
+                    _id: 1,
+                    fullName: 1,
+                    email: 1, 
+                    profileImage: 1
+                }
             }
         }
     ]);
@@ -159,7 +200,6 @@ const getMyPosts = async (userId: string) => {
                 as: 'votes'  // Create an array of votes
             }
         },
-        // Add a 'hasVoted' field to each post
         {
             $addFields: {
                 hasVoted: {
@@ -167,7 +207,20 @@ const getMyPosts = async (userId: string) => {
                 }
             }
         },
-        // Specify the fields you want in the result
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'authorId',
+                foreignField: '_id',
+                as: 'author'
+            }
+        },
+        {
+            $unwind: {
+                path: "$author",
+                preserveNullAndEmptyArrays: true
+            }
+        },
         {
             $project: {
                 content: 1,
@@ -177,7 +230,13 @@ const getMyPosts = async (userId: string) => {
                 isDeleted: 1,
                 createdAt: 1,
                 updatedAt: 1,
-                hasVoted: 1  // Include hasVoted in the result
+                hasVoted: 1,
+                author: {
+                    _id: 1,
+                    fullName: 1,
+                    email: 1,
+                    profileImage: 1
+                }
             }
         }
     ]);

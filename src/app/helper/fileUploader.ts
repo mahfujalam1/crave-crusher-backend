@@ -12,6 +12,8 @@ export const uploadFile = () => {
         uploadPath = 'uploads/images/profile';
       } else if (file.fieldname === 'post_images') {
         uploadPath = 'uploads/images/post_images';
+      } else if (file.fieldname === 'badge_image') {
+        uploadPath = 'uploads/images/badge_images';
       } else if (file.fieldname === 'battle_images') {
         uploadPath = 'uploads/images/battle_images';
       } else {
@@ -45,6 +47,7 @@ export const uploadFile = () => {
       'profileImage',
       'post_images',
       'battle_images',
+      'badge_image',
     ];
 
     if (file.fieldname === undefined) {
@@ -72,7 +75,8 @@ export const uploadFile = () => {
   }).fields([
     { name: 'profileImage', maxCount: 1 },
     { name: 'post_images', maxCount: 5 },
-    { name: 'battle_images', maxCount: 1 }
+    { name: 'battle_images', maxCount: 1 },
+    { name: 'badge_image', maxCount: 1 }
   ]);
 
   return upload;
