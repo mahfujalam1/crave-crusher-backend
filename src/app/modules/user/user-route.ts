@@ -37,4 +37,4 @@ router.get(
     UserControllers.getMyProfile
 );
 
-export const UserRotues = router;
+export const UserRoutes = router;

@@ -48,4 +48,4 @@ router.post(
     AuthControllers.resendResetCode
 );
 
-export const AuthRotues = router;
+export const AuthRoutes = router;

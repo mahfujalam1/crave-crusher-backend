@@ -19,7 +19,7 @@ const createBattleValidationSchema = z.object({
 
 const updateBattleStatusValidationSchema = z.object({
     body: z.object({
-        status: z.enum(['crave', 'caved', 'missed'])
+        status: z.enum(['craved', 'caved', 'missed'])
     })
 });
 

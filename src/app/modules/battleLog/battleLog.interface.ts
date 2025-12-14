@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 export enum BattleLogStatus {
-    CRAVE = 'crave',
+    CRAVED = 'craved',
     CAVED = 'caved',
     MISSED = 'missed'
 }

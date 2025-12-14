@@ -34,5 +34,7 @@ export interface IBattle {
     battleProgress: number;
     battleStatus: BattleStatus;
     totalCrave: number;
+    currentDayStatus?:string;
+    runningDay?:number;
     isDeleted: boolean;
 }

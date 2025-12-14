@@ -18,46 +18,46 @@ const createBattleIntoDB = async (userId: string, payload: Partial<IBattle>) => 
         totalCrave: 0,
         battleProgress: 0
     };
-
-    const battle = await Battle.create(battleData);
-
-    // Create battle logs for all days
-    const battleLogs = [];
-    for (let i = 1; i <= payload.battleLength!; i++) {
-        battleLogs.push({
-            battleId: battle._id,
-            day: i,
-            status: null
-        });
-    }
-    await BattleLog.insertMany(battleLogs);
-
-    // Check if user has badge progress, if not create first badge progress
-    let badgeProgress = await BadgeProgress.findOne({ userId });
-    if (!badgeProgress) {
-        const firstBadge = await Badge.findOne().sort({ orderNumber: 1 });
-        if (firstBadge) {
-            badgeProgress = await BadgeProgress.create({
-                userId,
-                currentProgress: 0,
-                craveCount: 0,
-                currentBadgeId: firstBadge._id,
-                nextBadgeId: await Badge.findOne({
-                    orderNumber: { $gt: firstBadge.orderNumber }
-                }).select('_id')
+    try {
+        const battle = await Battle.create(battleData)
+        const battleLogs = [];
+        for (let i = 1; i <= payload.battleLength!; i++) {
+            battleLogs.push({
+                battleId: battle._id,
+                day: i,
+                status: null
             });
         }
+        await BattleLog.insertMany(battleLogs);
+
+        let badgeProgress = await BadgeProgress.findOne({ userId });
+        if (!badgeProgress) {
+            const firstBadge = await Badge.findOne().sort({ orderNumber: 1 });
+            if (firstBadge) {
+                badgeProgress = await BadgeProgress.create({
+                    userId,
+                    currentProgress: 0,
+                    craveCount: 0,
+                    currentBadgeId: firstBadge._id,
+                    nextBadgeId: await Badge.findOne({
+                        orderNumber: { $gt: firstBadge.orderNumber }
+                    }).select('_id')
+                });
+            }
+        }
+
+        // Send notification
+        await sendSinglePushNotification(
+            userId,
+            'Battle Created!',
+            `Your ${payload.addictionType} battle has started. Stay strong!`,
+            { battleId: battle._id.toString() }
+        );
+
+        return battle;
+    } catch (err: any) {
+        console.log(err)
     }
-
-    // Send notification
-    await sendSinglePushNotification(
-        userId,
-        'Battle Created!',
-        `Your ${payload.addictionType} battle has started. Stay strong!`,
-        { battleId: battle._id.toString() }
-    );
-
-    return battle;
 };
 
 const updateBattleDayStatus = async (
@@ -88,34 +88,30 @@ const updateBattleDayStatus = async (
     await battleLog.save();
 
     // Only update progress if status is "crave"
-    if (status === 'crave') {
+    if (status === BattleLogStatus.CRAVED) {
         battle.totalCrave += 1;
-        battle.battleProgress = (battle.totalCrave / battle.battleLength) * 100;
+        battle.battleProgress = Math.round((battle.totalCrave / battle.battleLength) * 100);
 
-        // Update badge progress
         const badgeProgress = await BadgeProgress.findOne({ userId }).populate('currentBadgeId nextBadgeId');
 
         if (badgeProgress) {
             const today = new Date().toDateString();
             const lastCraveDay = badgeProgress.lastCraveDate?.toDateString();
 
-            //  Only count once per day across all battles
-            if (lastCraveDay !== today) {
+            if (lastCraveDay == today) {
                 badgeProgress.craveCount += 1;
                 badgeProgress.lastCraveDate = new Date();
 
                 const currentBadge = await Badge.findById(badgeProgress.currentBadgeId);
                 if (currentBadge) {
-                    badgeProgress.currentProgress = (badgeProgress.craveCount / currentBadge.orderNumber) * 100;
+                    badgeProgress.currentProgress = Math.round((badgeProgress.craveCount / currentBadge.orderNumber) * 100);
 
                     // Badge unlock logic
-                    if (badgeProgress.currentProgress >= 100 || badgeProgress.currentProgress === 100) {
-                        // Create user badge if not already created
+                    if (badgeProgress.currentProgress >= 100) {
                         const existingUserBadge = await UserBadge.findOne({
                             userId,
                             badgeId: currentBadge._id
                         });
-                        console.log('badge id ki ache???', existingUserBadge)
 
                         if (!existingUserBadge) {
                             const createUserBadge = await UserBadge.create({
@@ -125,7 +121,6 @@ const updateBattleDayStatus = async (
                             });
                             console.log(createUserBadge)
 
-                            // Send push notification for badge unlock
                             await sendSinglePushNotification(
                                 userId,
                                 'Badge Unlocked!',
@@ -133,7 +128,6 @@ const updateBattleDayStatus = async (
                                 { badgeId: currentBadge._id.toString() }
                             );
                         }
-                        console.log('badge id ki create hoiche??', existingUserBadge)
 
                         // Move to next badge
                         const nextBadge = await Badge.findOne({
@@ -180,13 +174,55 @@ const updateBattleDayStatus = async (
 };
 
 
-const getUserBattles = async (userId: string) => {
-    const battles = await Battle.find({
+const getUserBattles = async (userId: string, status?: string) => {
+    const query: any = {
         userId,
         isDeleted: false
-    }).sort({ createdAt: -1 });
+    };
 
-    return battles;
+    if (status) {
+        query.battleStatus = status;
+    }
+
+    const battles = await Battle.find(query).sort({ createdAt: -1 });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const battlesWithStatus = await Promise.all(
+        battles.map(async (battle) => {
+            const battleObj = battle.toObject();
+
+            if (battle.battleStatus === 'active') {
+                const daysPassed = battle.day;
+
+                const todayLog = await BattleLog.findOne({
+                    battleId: battle._id,
+                    day: daysPassed
+                });
+
+                if (todayLog) {
+                    if (todayLog.status === BattleLogStatus.CRAVED) {
+                        battleObj.currentDayStatus = 'craved';
+                    } else if (todayLog.status === null) {
+                        battleObj.currentDayStatus = 'pending';
+                    } else if (todayLog.status === BattleLogStatus.CAVED) {
+                        battleObj.currentDayStatus = 'caved';
+                    } else if (todayLog.status === BattleLogStatus.MISSED) {
+                        battleObj.currentDayStatus = 'missed';
+                    }
+                } else {
+                    battleObj.currentDayStatus = 'caved';
+                }
+
+                battleObj.runningDay = daysPassed;
+            }
+
+            return battleObj;
+        })
+    );
+
+    return battlesWithStatus;
 };
 
 const getBattleById = async (battleId: string, userId: string) => {

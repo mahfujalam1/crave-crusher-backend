@@ -33,7 +33,8 @@ const updateBattleStatus = catchAsync(async (req: Request, res: Response) => {
 
 const getUserBattles = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const result = await BattleServices.getUserBattles(userId);
+    const { status } = req.query;
+    const result = await BattleServices.getUserBattles(userId, status as string);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

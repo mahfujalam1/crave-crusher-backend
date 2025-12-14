@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { UserRotues } from '../modules/user/user-route';
-import { AuthRotues } from '../modules/auth/auth-route';
+import { UserRoutes } from '../modules/user/user-route';
+import { AuthRoutes } from '../modules/auth/auth-route';
 import { CommunityRoutes } from '../modules/community/post.route';
 import { VoteRoutes } from '../modules/vote/vote.route';
 import { CommentRoutes } from '../modules/comment/comment.route';
@@ -9,17 +9,18 @@ import { BattleRoutes } from '../modules/battle/battle.route';
 import { BadgeProgressRoutes } from '../modules/badgeProgress/badgeProgress.route';
 import { BadgeRoutes } from '../modules/badge/badge.route';
 import { UserBadgeRoutes } from '../modules/userBadge/userBadge.route';
+import { notificationRoutes } from '../modules/notification/notification.routes';
 
 const router = Router();
 
 const moduleRoutes = [
   {
     path: '/user',
-    route: UserRotues,
+    route: UserRoutes,
   },
   {
     path: '/auth',
-    route: AuthRotues,
+    route: AuthRoutes,
   },
   {
     path: '/community-post',
@@ -52,6 +53,10 @@ const moduleRoutes = [
   {
     path: '/user-badge',
     route: UserBadgeRoutes,
+  },
+  {
+    path: '/notification',
+    route: notificationRoutes,
   },
 ];
 
