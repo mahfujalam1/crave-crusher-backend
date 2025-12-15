@@ -1,5 +1,5 @@
 import httpStatus from "http-status";
-import { TUser, TUserRole } from "./user-interface";
+import { IOtherData, TUser, TUserRole } from "./user-interface";
 import AppError from "../../error/appError";
 import User from "./user-model";
 import sendEmail from "../../utils/sendEmail";
@@ -8,6 +8,10 @@ import { JwtPayload } from "jsonwebtoken";
 import { createToken } from "./user.utils";
 import config from "../../config";
 import { PostServices } from "../community/post.service";
+import { Battle } from "../battle/battle.model";
+import { Post } from "../community/post.model";
+import { UserBadge } from "../userBadge/userBadge.model";
+import QueryBuilder from "../../builder/QueryBuilder";
 
 const generateVerifyCode = (): number => {
   return Math.floor(100000 + Math.random() * 900000);
@@ -152,10 +156,80 @@ const updateProfile = async (id: string, imageUrl: string | undefined, fullName:
   return user;
 };
 
+
+const blockUser = async (userId: string) => {
+  const user = await User.find({ _id: userId, isDeleted: false })
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found!")
+  }
+  const result = await User.findByIdAndUpdate(userId, { isBlocked: true }, {
+    runValidators: true,
+  });
+  return result;
+}
+
+
+const getSingleUser = async (id: string) => {
+  const user = await User.findById(id);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  const battle = (await Battle.find({ userId: id, isDeleted: false, battleStatus: 'active' })).length
+  const post = (await Post.find({ authorId: id, isDeleted: false })).length
+  const earnBadge = (await UserBadge.find({ userId: id })).length
+  const other = {
+    activeBattle: battle,
+    earnBadge,
+    communityPost: post,
+  }
+  return { user, other };
+};
+
+
+const getAllUser = async (query: Record<string, unknown>) => {
+  const normalUserQuery = new QueryBuilder(
+    User.find(),
+    query,
+  )
+    .search(['fullName'])
+    .fields()
+    .filter()
+    .paginate()
+    .sort();
+
+  const meta = await normalUserQuery.countTotal();
+  const users = await normalUserQuery.modelQuery;
+
+  const result = await Promise.all(
+    users.map(async (user: TUser) => {
+      const battle = await Battle.find({ userId: user._id, isDeleted: false, }).countDocuments();
+      const post = await Post.find({ authorId: user._id, isDeleted: false }).countDocuments();
+      const earnBadge = await UserBadge.find({ userId: user._id }).countDocuments();
+
+      const other: IOtherData = {
+        activeBattle: battle,
+        earnBadge,
+        communityPost: post,
+      };
+
+      return { user, other };
+    })
+  );
+
+  return {
+    meta,
+    result,
+  };
+};
+
+
 export const UserServices = {
   createUserIntoDB,
   getMyProfile,
   resendVerifyCode,
   verifyCode,
-  updateProfile
+  updateProfile,
+  blockUser,
+  getSingleUser,
+  getAllUser
 };

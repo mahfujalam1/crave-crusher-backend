@@ -37,4 +37,21 @@ router.get(
     UserControllers.getMyProfile
 );
 
+router.patch('/block-user/:userId', 
+    auth(USER_ROLE.admin), 
+    UserControllers.blockUser
+);
+
+router.get(
+    '/get-single-user/:id',
+    auth(USER_ROLE.admin),
+    UserControllers.getSingleUser,
+);
+
+router.get(
+    '/get-all-users',
+    auth(USER_ROLE.admin),
+    UserControllers.getAllUser,
+);
+
 export const UserRoutes = router;

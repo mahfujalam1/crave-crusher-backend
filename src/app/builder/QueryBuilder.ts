@@ -24,7 +24,16 @@ class QueryBuilder<T> {
     filter() {
         const queryObj = { ...this.query }; // copy the query
         const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
+
+        // Remove the fields that shouldn't be part of the filtering
         excludeFields.forEach((el) => delete queryObj[el]);
+
+        // Special handling for isBlocked
+        if (this.query.isBlocked !== undefined) {
+            queryObj.isBlocked = this.query.isBlocked === 'true'; // Convert string 'true' to boolean true
+        }
+
+        // Apply the filter using the adjusted query object
         this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
         return this;
     }

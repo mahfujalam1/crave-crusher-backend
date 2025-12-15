@@ -3,6 +3,7 @@ import { USER_ROLE } from './user-constant';
 
 // Define the User type
 export type TUser = {
+  _id?:string
   fullName: string;
   email: string;
   profileImage: string;
@@ -19,6 +20,13 @@ export type TUser = {
   isDeleted: boolean;
   playerIds: string[];
 };
+
+
+export interface IOtherData {
+  activeBattle: number;
+  earnBadge: number;
+  communityPost: number;
+}
 
 // Define the UserModel interface, which includes static methods
 export interface UserModel extends Model<TUser> {

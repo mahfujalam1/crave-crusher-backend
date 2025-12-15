@@ -66,8 +66,8 @@ const getMyProfile = catchAsync(async (req, res) => {
 
 
 const updateProfile = catchAsync(async (req, res) => {
-  const {files} = req;
-  const {fullName} = req.body;
+  const { files } = req;
+  const { fullName } = req.body;
   let imageUrl;
   if (files && !Array.isArray(files) && files.profileImage && files.profileImage[0]) {
     imageUrl = files.profileImage[0].path;
@@ -83,10 +83,49 @@ const updateProfile = catchAsync(async (req, res) => {
   });
 });
 
+
+
+const blockUser = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const result = await UserServices.blockUser(userId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Successfully blocked this User',
+    data: result
+  })
+})
+
+
+const getSingleUser = catchAsync(async (req, res) => {
+  const result = await UserServices.getSingleUser(req.params.id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User retrieved successfully',
+    data: result,
+  });
+});
+
+
+const getAllUser = catchAsync(async (req, res) => {
+  const result = await UserServices.getAllUser(req?.query);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'users retrieved successfully',
+    data: result,
+  });
+});
+
 export const UserControllers = {
   createUser,
   verifyCode,
   resendVerifyCode,
   getMyProfile,
-  updateProfile
+  updateProfile,
+  blockUser,
+  getSingleUser,
+  getAllUser
 };

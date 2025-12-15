@@ -10,6 +10,7 @@ import { BadgeProgressRoutes } from '../modules/badgeProgress/badgeProgress.rout
 import { BadgeRoutes } from '../modules/badge/badge.route';
 import { UserBadgeRoutes } from '../modules/userBadge/userBadge.route';
 import { notificationRoutes } from '../modules/notification/notification.routes';
+import { metaRoutes } from '../modules/meta/meta.routes';
 
 const router = Router();
 
@@ -45,6 +46,10 @@ const moduleRoutes = [
   {
     path: '/badge',
     route: BadgeProgressRoutes,
+  },
+  {
+    path: '/meta',
+    route: metaRoutes,
   },
   {
     path: '/badge',

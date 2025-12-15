@@ -329,6 +329,23 @@ const resendVerifyCode = async (email: string) => {
   return null;
 };
 
+
+const deleteUser = async (userId: string) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found!");
+  }
+
+  const result = await User.findByIdAndDelete(userId);
+
+  if (!result) {
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "Failed to delete user.");
+  }
+
+  return result;
+};
+
 export const AuthServices = {
   logInUserIntoDB,
   forgetPassword,
@@ -337,4 +354,5 @@ export const AuthServices = {
   resetPassword,
   verifyResetOtp,
   changePasswordIntoDB,
+  deleteUser
 };

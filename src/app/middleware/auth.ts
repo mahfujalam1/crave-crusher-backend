@@ -61,7 +61,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
     //   throw new AppError(httpStatus.FORBIDDEN, 'You are not authorized 2');
     // }
     if (requiredRoles && !requiredRoles.includes(role)) {
-      throw new AppError(httpStatus.UNAUTHORIZED, 'Your are not authorized 3');
+      throw new AppError(httpStatus.UNAUTHORIZED, 'Your are not authorized');
     }
     // add those properties in req
     req.user = decoded as JwtPayload;

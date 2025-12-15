@@ -101,6 +101,18 @@ const resendVerifyCode = catchAsync(async (req, res) => {
   });
 });
 
+
+const deleteUser = catchAsync(async (req, res) => {
+  console.log(req.user.id)
+  const result = await AuthServices.deleteUser(req.user.id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Delete User successfully',
+    data: result,
+  });
+});
+
 export const AuthControllers = {
   logInUser,
   forgetPassword,
@@ -108,5 +120,6 @@ export const AuthControllers = {
   resendResetCode,
   resendVerifyCode,
   resetPassword,
-  verifyResetOtp
+  verifyResetOtp,
+  deleteUser
 };

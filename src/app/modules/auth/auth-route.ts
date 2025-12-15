@@ -48,4 +48,6 @@ router.post(
     AuthControllers.resendResetCode
 );
 
+router.delete('/delete-user', auth(USER_ROLE.user), AuthControllers.deleteUser)
+
 export const AuthRoutes = router;
