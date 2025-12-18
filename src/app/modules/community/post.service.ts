@@ -7,6 +7,7 @@ import path from 'path';
 import { Vote } from '../vote/vote.model';
 import { Comment } from '../comment/comment.model';
 import mongoose from 'mongoose';
+import { UserBadge } from '../userBadge/userBadge.model';
 
 const createPostIntoDB = async (payload: Partial<IPost>) => {
     const post = new Post(payload);
@@ -241,7 +242,22 @@ const getMyPosts = async (userId: string) => {
         }
     ]);
 
-    return posts;
+    // Calculate total reactions (sum of all totalVotes)
+    const totalReaction = posts.reduce((sum, post) => sum + (post.totalVotes || 0), 0);
+
+    // Get total badges for the user
+    const userBadges = await UserBadge.find({ userId: new mongoose.Types.ObjectId(userId) });
+    const totalBadge = userBadges.length;
+
+    // Get total posts count
+    const totalPost = posts.length;
+
+    return {
+        posts,
+        totalReaction,
+        totalBadge,
+        totalPost
+    };
 };
 
 

@@ -4,7 +4,7 @@ import { ENUM_USER_STATUS } from "../../utils/enum";
 // Define the schema
 const UserValidationSchema = z.object({
   body: z.object({
-    fullName: z.string().min(2, { message: 'full Name is required' }),
+    fullName: z.string().min(2, { message: 'full Name is required' }).max(12, {message:"Full Name is maximum within 12 character"}),
     email: z.string().email({ message: 'Invalid email format' }),
     password: z.string().min(6, { message: 'Password must be at least 6 characters long' }),
   }),

@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
+import AppError from "../error/appError";
 
 const errorMiddleware = (
   err: any,
@@ -28,7 +29,8 @@ const errorMiddleware = (
     statusCode = 400;
     message = "Duplicate Entry";
     errorMessages = [{ path: "", message: err.message }];
-  } else if (err instanceof ZodError) {
+  }
+  else if (err instanceof ZodError) {
     statusCode = 400;
     message = "Validation Error";
     errorMessages = err.errors.map((error: any) => ({
@@ -36,6 +38,11 @@ const errorMiddleware = (
       message: error.message,
     }));
   }
+  else if (err instanceof AppError) {
+    statusCode = err.statusCode;
+    message = err.message;
+  }
+
 
   res.status(statusCode).json({
     success: false,

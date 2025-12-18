@@ -37,7 +37,9 @@ const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(httpStatus.UNAUTHORIZED, 'Token is expired');
     }
     // get the user if that here ---------
+    console.log('user id=>', id)
     const user = await User.findById(id);
+    
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, 'This user does not exist');
     }

@@ -8,6 +8,10 @@ import { BadgeProgress } from '../badgeProgress/badgeProgress.model';
 import { Badge } from '../badge/badge.model';
 import { UserBadge } from '../userBadge/userBadge.model';
 import { BattleLogStatus } from '../battleLog/battleLog.interface';
+import { Types } from 'mongoose';
+import { Monster } from '../monster/monster.model';
+
+const utcDateKey = (d: Date) => d.toISOString().slice(0, 10);
 
 const createBattleIntoDB = async (userId: string, payload: Partial<IBattle>) => {
     const battleData = {
@@ -66,14 +70,23 @@ const updateBattleDayStatus = async (
     status: BattleLogStatus
 ) => {
     const battle = await Battle.findOne({
-        _id: battleId,
-        userId,
+        _id: new Types.ObjectId(battleId),
+        userId: new Types.ObjectId(userId),
         battleStatus: BattleStatus.ACTIVE,
         isDeleted: false
     });
 
     if (!battle) {
         throw new AppError(httpStatus.NOT_FOUND, 'Battle not found or not active');
+    }
+
+    // ✅ New condition: skip checking for multiple check-ins if in testing mode
+    const isTestingMode = 'test';  // or another flag you can set for testing
+
+    // ✅ Enforce: one check-in per day (unless testing mode is enabled)
+    const now = new Date();
+    if (!isTestingMode && battle.lastCheckInAt && utcDateKey(battle.lastCheckInAt) === utcDateKey(now)) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'You already checked in today');
     }
 
     const currentDay = battle.day;
@@ -86,6 +99,13 @@ const updateBattleDayStatus = async (
     // Update battle log status
     battleLog.status = status;
     await battleLog.save();
+
+    // ✅ NEW: update last check-in fields (only these new props)
+    if (status === BattleLogStatus.CRAVED || status === BattleLogStatus.CAVED) {
+        battle.lastCheckInAt = now;
+        battle.lastCheckInStatus =
+            status === BattleLogStatus.CRAVED ? 'craved' : 'caved';
+    }
 
     // Only update progress if status is "crave"
     if (status === BattleLogStatus.CRAVED) {
@@ -119,7 +139,7 @@ const updateBattleDayStatus = async (
                                 badgeId: currentBadge._id,
                                 isClaim: false
                             });
-                            console.log(createUserBadge)
+                            console.log(createUserBadge);
 
                             await sendSinglePushNotification(
                                 userId,
@@ -169,60 +189,43 @@ const updateBattleDayStatus = async (
     }
 
     await battle.save();
-
     return battle;
 };
 
 
+
 const getUserBattles = async (userId: string, status?: string) => {
-    const query: any = {
-        userId,
+    const matchStage: any = {
+        userId: new Types.ObjectId(userId),
         isDeleted: false
     };
 
     if (status) {
-        query.battleStatus = status;
+        matchStage.battleStatus = status;
     }
 
-    const battles = await Battle.find(query).sort({ createdAt: -1 });
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const battlesWithStatus = await Promise.all(
-        battles.map(async (battle) => {
-            const battleObj = battle.toObject();
-
-            if (battle.battleStatus === 'active') {
-                const daysPassed = battle.day;
-
-                const todayLog = await BattleLog.findOne({
-                    battleId: battle._id,
-                    day: daysPassed
-                });
-
-                if (todayLog) {
-                    if (todayLog.status === BattleLogStatus.CRAVED) {
-                        battleObj.currentDayStatus = 'craved';
-                    } else if (todayLog.status === null) {
-                        battleObj.currentDayStatus = 'pending';
-                    } else if (todayLog.status === BattleLogStatus.CAVED) {
-                        battleObj.currentDayStatus = 'caved';
-                    } else if (todayLog.status === BattleLogStatus.MISSED) {
-                        battleObj.currentDayStatus = 'missed';
+    const battles = await Battle.aggregate([
+        {
+            $match: matchStage
+        },
+        {
+            $addFields: {
+                todayStatus: {
+                    $cond: {
+                        if: { $ne: ["$lastCheckInStatus", null] },
+                        then: "$lastCheckInStatus",
+                        else: "pending"
                     }
-                } else {
-                    battleObj.currentDayStatus = 'caved';
-                }
-
-                battleObj.runningDay = daysPassed;
+                },
+                runningDay: "$day"
             }
+        },
+        {
+            $sort: { createdAt: -1 }
+        }
+    ]);
 
-            return battleObj;
-        })
-    );
-
-    return battlesWithStatus;
+    return battles;
 };
 
 const getBattleById = async (battleId: string, userId: string) => {
@@ -238,9 +241,15 @@ const getBattleById = async (battleId: string, userId: string) => {
 
     const battleLogs = await BattleLog.find({ battleId, status: { $ne: null } }).sort({ day: 1 });
 
+    const progressPercentage = battle.battleProgress || 0;
+    const monsterOrderNumber = Math.min(Math.ceil(progressPercentage / 10) || 1, 11);
+
+    const monster = await Monster.findOne({ orderNumber: monsterOrderNumber }).select('-orderNumber -createdAt -updatedAt -__v -_id')
+
     return {
         battle,
-        battleLogs
+        battleLogs,
+        monster
     };
 };
 

@@ -23,6 +23,7 @@ export enum BattleStatus {
     CANCEL = 'cancel'
 }
 
+
 export interface IBattle {
     userId: Types.ObjectId;
     addictionType: AddictionType;
@@ -34,7 +35,8 @@ export interface IBattle {
     battleProgress: number;
     battleStatus: BattleStatus;
     totalCrave: number;
-    currentDayStatus?:string;
-    runningDay?:number;
+    runningDay?: number;
     isDeleted: boolean;
+    lastCheckInAt: Date | null;
+    lastCheckInStatus: 'craved' | 'caved' | null;
 }

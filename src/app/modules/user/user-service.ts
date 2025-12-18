@@ -12,6 +12,7 @@ import { Battle } from "../battle/battle.model";
 import { Post } from "../community/post.model";
 import { UserBadge } from "../userBadge/userBadge.model";
 import QueryBuilder from "../../builder/QueryBuilder";
+import { Monster } from "../monster/monster.model";
 
 const generateVerifyCode = (): number => {
   return Math.floor(100000 + Math.random() * 900000);
@@ -136,7 +137,66 @@ const getMyProfile = async (userData: JwtPayload) => {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  return result;
+  const battleProgressData = await Battle.aggregate([
+    {
+      $match: {
+        userId: result._id,
+        isDeleted: false
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalProgress: { $sum: "$battleProgress" },
+        totalBattles: { $sum: 1 },
+        totalPossibleProgress: { $sum: 100 } // each battle has max 100% progress
+      }
+    },
+    {
+      $addFields: {
+        overallProgressPercentage: {
+          $cond: {
+            if: { $gt: ["$totalPossibleProgress", 0] },
+            then: {
+              $multiply: [
+                { $divide: ["$totalProgress", "$totalPossibleProgress"] },
+                100
+              ]
+            },
+            else: 0
+          }
+        }
+      }
+    },
+    {
+      $addFields: {
+        monsterOrderNumber: {
+          $min: [
+            {
+              $max: [
+                { $ceil: { $divide: ["$overallProgressPercentage", 10] } },
+                1
+              ]
+            },
+            11
+          ]
+        }
+      }
+    }
+  ]);
+
+  let monster = null;
+
+  if (battleProgressData.length > 0) {
+    const data = battleProgressData[0];
+
+    monster = await Monster.findOne({ orderNumber: data.monsterOrderNumber }).select('-orderNumber -createdAt -updatedAt -__v -_id')
+  }
+
+  return {
+    ...result.toObject(),
+    monster
+  };
 };
 
 

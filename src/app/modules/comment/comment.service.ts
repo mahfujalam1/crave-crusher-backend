@@ -45,7 +45,7 @@ const deleteComment = async (commentId: string) => {
 };
 
 const getCommentsSinglePost= async(postId:string)=>{
-    const comments = await Comment.find({postId})
+    const comments = await Comment.find({postId}).populate({path:'authorId', select:"fullName"})
     return comments
 }
 

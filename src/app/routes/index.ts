@@ -11,6 +11,7 @@ import { BadgeRoutes } from '../modules/badge/badge.route';
 import { UserBadgeRoutes } from '../modules/userBadge/userBadge.route';
 import { notificationRoutes } from '../modules/notification/notification.routes';
 import { metaRoutes } from '../modules/meta/meta.routes';
+import { MonsterRoutes } from '../modules/monster/monster.routes';
 
 const router = Router();
 
@@ -58,6 +59,10 @@ const moduleRoutes = [
   {
     path: '/user-badge',
     route: UserBadgeRoutes,
+  },
+  {
+    path: '/monster',
+    route: MonsterRoutes,
   },
   {
     path: '/notification',

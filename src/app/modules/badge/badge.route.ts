@@ -10,7 +10,6 @@ const router = Router();
 
 router.post(
     '/badges',
-    // auth(USER_ROLE.admin),
     uploadFile(),
     validateRequest(BadgeValidations.createBadgeValidationSchema),
     BadgeControllers.createBadge
