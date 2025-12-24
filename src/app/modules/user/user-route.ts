@@ -53,4 +53,10 @@ router.get(
     UserControllers.getAllUser,
 );
 
+router.get(
+    '/daily-tip',
+    auth(USER_ROLE.admin, USER_ROLE.user), // if you want to protect this route
+    UserControllers.getDailyTip
+);
+
 export const UserRoutes = router;

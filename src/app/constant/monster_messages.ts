@@ -13,6 +13,40 @@ export const monster_power_messages = {
 };
 
 
+export const dailyCravingTips = [
+    "Name the craving out loud - 'This is a craving, not a command.' Labeling reduces its power.",
+    "Delay for 10 minutes - Promise yourself you'll decide later. Cravings weaken when delayed.",
+    "Visualize the real outcome - how you'll feel in 1 hour, tomorrow, next week.",
+    "Use 'Urge Surfing' - Imagine the craving as a wave - observe it rise, peak, and fall without acting.",
+    "Challenge the thought - Ask: Is this helping me or hurting me? Is it true that I 'need' this?",
+    "Repeat a grounding phrase - Examples: 'I choose progress over comfort.' 'This feeling will pass.'",
+    "Change your location immediately - Stand up, go outside, move rooms - This breaks the environmental trigger.",
+    "Do 20-30 jumping jacks or pushups - Physical exertion disrupts dopamine craving loops.",
+    "Cold water reset - Splash cold water on your face or hold an ice cube for 30 seconds.",
+    "Deep breathing (4-7-8 or box breathing) - Slows the nervous system and reduces impulsive urgency.",
+    "Chew gum or crunch something - Oral stimulation helps with many addictions.",
+    "Stretch or shake your body - Release stored tension driving the urge.",
+    "Set a 10-minute timer and clean something - Productive distraction works best.",
+    "Text someone 'I'm having a craving' - Accountability reduces relapses likelihood.",
+    "Watch a short video or listen to music - Choose something emotionally neutral or uplifting.",
+    "Play a fast-paced game or puzzle - Redirects attention and dopamine.",
+    "Take a shower - Water resets sensory overload and emotional arousal.",
+    "Go for a brisk walk - Especially powerful for nicotine, alcohol, and stress-based cravings.",
+    "Identify the real feeling underneath - Hunger, anger, loneliness, boredom, stress (HALBS).",
+    "Self-soothe intentionally - Use comfort without the addiction (blanket, tea, calming scent).",
+    "Write one sentence about the urge - Getting it out of your head reduces intensity.",
+    "Practice self-compassion - Shame fuels addiction. Progress requires kindness.",
+    "Remind yourself why you quit - Keep a list saved on your phone.",
+    "Remove or reduce triggers in advance - Environment beats willpower every time.",
+    "Eat and hydrate regularly - Low blood sugar mimics cravings.",
+    "Create a 'craving plan' - Decide before the urge hits what you'll do.",
+    "Track cravings, not just slips - Awareness builds control.",
+    "Celebrate small wins - Each resisted craving strengthens your brain.",
+    "Replace, don't just remove - Add healthy dopamine sources (exercise, creativity, connection).",
+    "Remember: cravings peak, then pass - You are not failing - you are healing."
+];
+
+
 export const monster_messages = {
     SMOKING_DETOX: [
         {

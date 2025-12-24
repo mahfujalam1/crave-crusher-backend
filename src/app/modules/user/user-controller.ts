@@ -119,6 +119,18 @@ const getAllUser = catchAsync(async (req, res) => {
   });
 });
 
+
+const getDailyTip = catchAsync(async (req, res) => {
+  const result = await UserServices.getDailyTip();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Daily tip retrieved successfully',
+    data: result
+  });
+});
+
 export const UserControllers = {
   createUser,
   verifyCode,
@@ -127,5 +139,6 @@ export const UserControllers = {
   updateProfile,
   blockUser,
   getSingleUser,
-  getAllUser
+  getAllUser,
+  getDailyTip
 };

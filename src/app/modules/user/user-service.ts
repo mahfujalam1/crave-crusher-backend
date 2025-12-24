@@ -12,7 +12,7 @@ import { Post } from "../community/post.model";
 import { UserBadge } from "../userBadge/userBadge.model";
 import QueryBuilder from "../../builder/QueryBuilder";
 import { Monster } from "../monster/monster.model";
-import { monster_power_messages } from "../../constant/monster_messages";
+import { dailyCravingTips, monster_power_messages } from "../../constant/monster_messages";
 
 const generateVerifyCode = (): number => {
   return Math.floor(100000 + Math.random() * 900000);
@@ -310,6 +310,28 @@ const getAllUser = async (query: Record<string, unknown>) => {
 };
 
 
+const getDailyTip = async () => {
+  // Get current date as seed for consistent daily tip
+  const today = new Date();
+  const dateString = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+
+  // Simple hash function to get consistent index for the day
+  let hash = 0;
+  for (let i = 0; i < dateString.length; i++) {
+    hash = ((hash << 5) - hash) + dateString.charCodeAt(i);
+    hash = hash & hash; // Convert to 32bit integer
+  }
+
+  // Get positive index within array length
+  const index = Math.abs(hash) % dailyCravingTips.length;
+
+  return {
+    tip: dailyCravingTips[index],
+    date: today.toISOString().split('T')[0]
+  };
+};
+
+
 export const UserServices = {
   createUserIntoDB,
   getMyProfile,
@@ -318,5 +340,6 @@ export const UserServices = {
   updateProfile,
   blockUser,
   getSingleUser,
-  getAllUser
+  getAllUser,
+  getDailyTip
 };
