@@ -11,23 +11,19 @@ const notificationSchema = new Schema<INotification>(
             type: String,
             required: true,
         },
+        seen: {
+            type: Boolean,
+            default: false,
+        },
         receiver: {
             type: String,
             required: true,
         },
-        deleteBy: {
-            type: [String],
-            default: [],
-        },
-        seenBy: {
-            type: [String],
-            default: [],
-        },
     },
-    //-------------------------
+
     {
         timestamps: true,
-    }
+    },
 );
 
 const Notification = model<INotification>('Notification', notificationSchema);

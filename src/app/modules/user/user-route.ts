@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { UserControllers } from "./user-controller";
 import validateRequest from "../../middleware/validateRequest";
-import UserValidationSchema from "./user-validation";
 import { USER_ROLE } from "./user-constant";
 import userValidations from "./user-validation";
 import auth from "../../middleware/auth";
@@ -26,7 +25,7 @@ router.post(
 
 router.patch(
     '/update-profile',
-    auth(USER_ROLE.user),
+    auth(USER_ROLE.admin, USER_ROLE.user),
     uploadFile(),
     UserControllers.updateProfile
 );

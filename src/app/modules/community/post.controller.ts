@@ -92,6 +92,19 @@ const getMyPosts = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const getSingleUserPosts = catchAsync(async (req: Request, res: Response) => {
+    const { userId } = req.params
+    const posts = await PostServices.getMyPosts(userId);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Get all posts retrieved successfully",
+        data: posts,
+    });
+});
+
+
 const deletePost = catchAsync(async (req: Request, res: Response) => {
     const { postId } = req.params
 
@@ -111,5 +124,6 @@ export const PostControllers = {
     getAllPosts,
     updatePost,
     deletePost,
-    getMyPosts
+    getMyPosts,
+    getSingleUserPosts
 }

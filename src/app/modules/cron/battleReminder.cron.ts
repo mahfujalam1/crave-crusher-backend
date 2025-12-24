@@ -40,6 +40,7 @@ export const battleReminderCron = cron.schedule('0 22 * * *', async () => {
             );
             console.log(`Sent reminders to ${usersToNotify.length} users`);
         }
+        
     } catch (error) {
         console.error('Error in battle reminder cron:', error);
     }

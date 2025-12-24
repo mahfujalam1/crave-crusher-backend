@@ -42,11 +42,11 @@ router.post(
     AuthControllers.resendResetCode
 );
 
-router.post(
-    '/resend-verify-code',
-    validateRequest(authValidations.resendResetCodeValidationSchema),
-    AuthControllers.resendResetCode
-);
+// router.post(
+//     '/resend-verify-code',
+//     validateRequest(authValidations.resendResetCodeValidationSchema),
+//     AuthControllers.resendResetCode
+// );
 
 router.delete('/delete-user', auth(USER_ROLE.user), AuthControllers.deleteUser)
 

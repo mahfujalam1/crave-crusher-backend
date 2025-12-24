@@ -37,7 +37,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(httpStatus.UNAUTHORIZED, 'Token is expired');
     }
     // get the user if that here ---------
-    console.log('user id=>', id)
     const user = await User.findById(id);
     
     if (!user) {
@@ -52,16 +51,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
     if (!user?.isVerified) {
       throw new AppError(httpStatus.BAD_REQUEST, 'You are not verified user');
     }
-
-    // if (
-    //   user?.passwordChangedAt &&
-    //   (await User.isJWTIssuedBeforePasswordChange(
-    //     user?.passwordChangedAt,
-    //     iat as number,
-    //   ))
-    // ) {
-    //   throw new AppError(httpStatus.FORBIDDEN, 'You are not authorized 2');
-    // }
     if (requiredRoles && !requiredRoles.includes(role)) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'Your are not authorized');
     }

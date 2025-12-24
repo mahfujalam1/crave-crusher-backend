@@ -10,37 +10,79 @@ import { TUserRole } from "../user/user-interface";
 import { createToken } from "../user/user.utils";
 import { TLogin } from "./auth-interface";
 import { JwtPayload } from "jsonwebtoken";
+import registrationSuccessEmailBody from "../../mailTemplate/registerSucessEmail";
 
 const generateVerifyCode = (): number => {
   return Math.floor(100000 + Math.random() * 900000);
 };
 
-const logInUserIntoDB = async (payload: TLogin) => {
+const logInUserIntoDB = async (payload: TLogin & { playerId?: string }) => {
+  // Find the user by email
   const user = await User.findOne({ email: payload.email });
+
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user does not exist');
   }
+
+  // Check if the user is deleted
   if (user.isDeleted) {
-    throw new AppError(
-      httpStatus.FORBIDDEN,
-      'This user is already deleted'
-    );
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is already deleted');
   }
+
+  // Generate a new verification code
+  const verifyCode = generateVerifyCode();
+
+  if (!user.isVerified || !user.isActive) {
+    user.verifyCode = verifyCode;
+    user.save();
+
+    sendEmail({
+      email: payload.email,
+      subject: 'Activate Your Account',
+      html: registrationSuccessEmailBody(user.fullName, verifyCode),
+    });
+
+    return { email_verification: false };
+  }
+
+  // Check if the user is blocked
   if (user.isBlocked) {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked');
   }
 
-
-  // checking if the password is correct ----
+  // Check if the provided password matches the stored hashed password
   if (!(await User.isPasswordMatched(payload?.password, user?.password))) {
-    throw new AppError(httpStatus.FORBIDDEN, 'Password do not match');
+    throw new AppError(httpStatus.FORBIDDEN, 'Password does not match');
   }
 
+  // Handle playerId update (same logic as your first example)
+  if (payload.playerId) {
+    const currentPlayerIds = user.playerIds || [];
+
+    // If already exists, remove it first (to avoid duplicates)
+    const filtered = currentPlayerIds.filter(
+      (id) => id !== payload.playerId
+    );
+
+    // Add the new one to the end
+    filtered.push(payload.playerId);
+
+    // If length > 3, remove from beginning
+    if (filtered.length > 3) {
+      filtered.shift();
+    }
+
+    await User.findByIdAndUpdate(user._id, { playerIds: filtered });
+  }
+
+  // Create the JWT payload for generating tokens
   const jwtPayload = {
-    id: String(user!._id),
-    email: user!.email,
-    role: user!.role as TUserRole,
+    id: String(user._id),
+    email: user.email,
+    role: user.role as TUserRole,
   };
+
+  // Create access and refresh tokens
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_screet as string,
@@ -52,13 +94,14 @@ const logInUserIntoDB = async (payload: TLogin) => {
     config.jwt_access_expires_in
   );
 
-
   return {
-    id: user?._id,
+    id: user._id,
     accessToken,
     refreshToken,
   };
 };
+
+
 
 
 const changePasswordIntoDB = async (
@@ -75,6 +118,7 @@ const changePasswordIntoDB = async (
       "Password and confirm password doesn't match"
     );
   }
+
   const user = await User.findById(userData.id);
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user does not exist');
@@ -89,14 +133,25 @@ const changePasswordIntoDB = async (
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked');
   }
 
-  if (!(await User.isPasswordMatched(payload?.oldPassword, user?.password))) {
-    throw new AppError(httpStatus.FORBIDDEN, 'Password do not match');
+  // Debugging: Log password comparison
+  console.log('Comparing Passwords...');
+  console.log('Old Password (Plain):', payload.oldPassword);
+  console.log('Stored Password Hash:', user.password);
+
+  const isMatched = await bcrypt.compare(payload.oldPassword, user.password);
+  console.log('Password Match Result:', isMatched);
+
+  if (!isMatched) {
+    throw new AppError(httpStatus.FORBIDDEN, 'Password does not match');
   }
-  //hash new password
+
+  // Hash the new password
   const newHashedPassword = await bcrypt.hash(
     payload.newPassword,
     Number(config.bcrypt_salt_rounds)
   );
+
+  // Update the user's password
   await User.findOneAndUpdate(
     {
       _id: userData.id,
@@ -108,11 +163,13 @@ const changePasswordIntoDB = async (
     }
   );
 
+  // Create new tokens
   const jwtPayload = {
-    id: String(user!._id),
-    email: user!.email,
-    role: user!.role as TUserRole,
+    id: String(user._id),
+    email: user.email,
+    role: user.role as TUserRole,
   };
+
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_screet as string,
@@ -123,11 +180,13 @@ const changePasswordIntoDB = async (
     config.jwt_access_screet as string,
     config.jwt_access_expires_in
   );
+
   return {
     accessToken,
     refreshToken,
   };
 };
+
 
 
 // forgot password

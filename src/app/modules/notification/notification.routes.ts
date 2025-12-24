@@ -27,5 +27,12 @@ router.delete(
     auth(USER_ROLE.user, USER_ROLE.admin),
     notificationController.deleteNotification
 );
+
+
+router.get(
+    '/get-notifications/:id',
+    auth(USER_ROLE.user, USER_ROLE.admin),
+    notificationController.deleteNotification
+);
 //
 export const notificationRoutes = router;

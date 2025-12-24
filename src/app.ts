@@ -25,7 +25,6 @@ app.use("/api/v1", router);
 
 const test = async (req: Request, res: Response) => {
   const user = await User.findOne()
-  console.log(user)
   res.send("Crave Crusher server is running Successfully.");
 };
 

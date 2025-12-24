@@ -13,17 +13,14 @@ import { USER_ROLE } from '../user/user-constant';
 
 const getAllNotificationFromDB = async (
     query: Record<string, any>,
-    user: JwtPayload
+    user: JwtPayload,
 ) => {
     if (user?.role === USER_ROLE.admin) {
         const notificationQuery = new QueryBuilder(
-            Notification.find({
-                $or: [{ receiver: USER_ROLE.admin }, { receiver: 'all' }],
-                deleteBy: { $ne: user.profileId },
-            }),
-            query
+            Notification.find({ receiver: USER_ROLE.admin }),
+            query,
         )
-            .search(['name'])
+            .search(['title'])
             .filter()
             .sort()
             .paginate()
@@ -33,12 +30,8 @@ const getAllNotificationFromDB = async (
         return { meta, result };
     } else {
         const notificationQuery = new QueryBuilder(
-            Notification.find({
-                $or: [{ receiver: user?.id }, { receiver: 'all' }],
-                deleteBy: { $ne: user?.profileId },
-            }),
-
-            query
+            Notification.find({ receiver: user?.id }),
+            query,
         )
             .search(['title'])
             .filter()

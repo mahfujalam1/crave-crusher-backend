@@ -300,6 +300,84 @@ const getPostsByUser = async (userId: string) => {
     return postsWithCommentsAndVotes;
 };
 
+
+const getSingleUserPosts = async (userId: string) => {
+    const posts = await Post.aggregate([
+        // Filter posts by authorId (userId)
+        {
+            $match: {
+                authorId: new mongoose.Types.ObjectId(userId),
+                isDeleted: false
+            }
+        },
+        // Fetch all votes related to the posts
+        {
+            $lookup: {
+                from: 'votes',  // Join with the 'votes' collection
+                localField: '_id',  // Field from 'Post' collection
+                foreignField: 'postId',  // Field from 'Vote' collection
+                as: 'votes'  // Create an array of votes
+            }
+        },
+        {
+            $addFields: {
+                hasVoted: {
+                    $in: [new mongoose.Types.ObjectId(userId), { $map: { input: "$votes", as: "vote", in: "$$vote.userId" } }]
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'authorId',
+                foreignField: '_id',
+                as: 'author'
+            }
+        },
+        {
+            $unwind: {
+                path: "$author",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $project: {
+                content: 1,
+                post_images: 1,
+                totalVotes: 1,
+                totalComments: 1,
+                isDeleted: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                hasVoted: 1,
+                author: {
+                    _id: 1,
+                    fullName: 1,
+                    email: 1,
+                    profileImage: 1
+                }
+            }
+        }
+    ]);
+
+    // Calculate total reactions (sum of all totalVotes)
+    const totalReaction = posts.reduce((sum, post) => sum + (post.totalVotes || 0), 0);
+
+    // Get total badges for the user
+    const userBadges = await UserBadge.find({ userId: new mongoose.Types.ObjectId(userId) });
+    const totalBadge = userBadges.length;
+
+    // Get total posts count
+    const totalPost = posts.length;
+
+    return {
+        posts,
+        totalReaction,
+        totalBadge,
+        totalPost
+    };
+};
+
 export const PostServices = {
     createPostIntoDB,
     getPostById,
@@ -307,5 +385,6 @@ export const PostServices = {
     updatePostIntoDB,
     deletePostFormDB,
     getPostsByUser,
-    getMyPosts
+    getMyPosts,
+    getSingleUserPosts
 }

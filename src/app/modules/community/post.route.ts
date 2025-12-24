@@ -45,4 +45,7 @@ router.get('/posts', auth(USER_ROLE.admin, USER_ROLE.user), PostControllers.getA
 // Get my all posts
 router.get('/my-posts', auth(USER_ROLE.user), PostControllers.getMyPosts )
 
+
+router.get('/get-single-user-posts/:userId', auth(USER_ROLE.user, USER_ROLE.admin), PostControllers.getSingleUserPosts )
+
 export const CommunityRoutes = router;

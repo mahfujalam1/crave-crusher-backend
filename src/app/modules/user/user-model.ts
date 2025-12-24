@@ -19,7 +19,7 @@ const userSchema: Schema = new Schema(
     },
     isResetVerified: { type: Boolean, default: false },
     codeExpireIn: { type: Date, default: null },
-    isActive: { type: Boolean, default: true },
+    isActive: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
     playerIds: { type: [String], default: [] },
   },

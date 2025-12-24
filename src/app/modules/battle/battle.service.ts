@@ -1,5 +1,5 @@
 import { Battle } from './battle.model';
-import { IBattle, BattleStatus } from './battle.interface';
+import { IBattle, BattleStatus, } from './battle.interface';
 import httpStatus from 'http-status';
 import { sendSinglePushNotification } from '../../helper/sendPushNotification';
 import AppError from '../../error/appError';
@@ -10,6 +10,8 @@ import { UserBadge } from '../userBadge/userBadge.model';
 import { BattleLogStatus } from '../battleLog/battleLog.interface';
 import { Types } from 'mongoose';
 import { Monster } from '../monster/monster.model';
+import Notification from '../notification/notification.model';
+import { monster_messages } from '../../constant/monster_messages';
 
 const utcDateKey = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -57,6 +59,12 @@ const createBattleIntoDB = async (userId: string, payload: Partial<IBattle>) => 
             `Your ${payload.addictionType} battle has started. Stay strong!`,
             { battleId: battle._id.toString() }
         );
+        const notificationData = {
+            title: 'Battle Created!',
+            message: `Your ${payload.addictionType} battle has started. Stay strong!`,
+            receiver: userId,
+        };
+        await Notification.create(notificationData)
 
         return battle;
     } catch (err: any) {
@@ -139,7 +147,6 @@ const updateBattleDayStatus = async (
                                 badgeId: currentBadge._id,
                                 isClaim: false
                             });
-                            console.log(createUserBadge);
 
                             await sendSinglePushNotification(
                                 userId,
@@ -233,7 +240,7 @@ const getBattleById = async (battleId: string, userId: string) => {
         _id: battleId,
         userId,
         isDeleted: false
-    });
+    }).lean();
 
     if (!battle) {
         throw new AppError(httpStatus.NOT_FOUND, 'Battle not found');
@@ -244,12 +251,51 @@ const getBattleById = async (battleId: string, userId: string) => {
     const progressPercentage = battle.battleProgress || 0;
     const monsterOrderNumber = Math.min(Math.ceil(progressPercentage / 10) || 1, 11);
 
-    const monster = await Monster.findOne({ orderNumber: monsterOrderNumber }).select('-orderNumber -createdAt -updatedAt -__v -_id')
+    const monster = await Monster.findOne({ orderNumber: monsterOrderNumber }).select('-orderNumber -createdAt -updatedAt -__v -_id').lean();
+
+    // Get monster message based on addiction type and current day
+    let monsterMessage = '';
+
+    // Convert addiction type to match monster_messages key format
+    // "Shopping Detox" -> "SHOPPING_DETOX"
+    const addictionTypeKey = battle.addictionType
+        .toUpperCase()
+        .replace(/\s+/g, '_') as keyof typeof monster_messages;
+
+    const currentDay = battle.day;
+
+    // Direct access to messages array using the addiction type key
+    if (monster_messages[addictionTypeKey]) {
+        const messages = monster_messages[addictionTypeKey];
+
+        // Find exact day match or the closest previous day
+        const messageObj = messages
+            .filter((msg) => msg.day <= currentDay)
+            .sort((a, b) => b.day - a.day)[0];
+
+        if (messageObj) {
+            monsterMessage = messageObj.message;
+        }
+    }
+
+    // Add monster_message to monster object
+    const monsterWithMessage = monster ? {
+        ...monster,
+        monster_message: monsterMessage
+    } : null;
+
+    const battleWithStatus = {
+        ...battle,
+        todayStatus: battle.lastCheckInStatus !== null && battle.lastCheckInStatus !== undefined
+            ? battle.lastCheckInStatus
+            : "pending",
+        runningDay: battle.day
+    };
 
     return {
-        battle,
+        battle: battleWithStatus,
         battleLogs,
-        monster
+        monster: monsterWithMessage
     };
 };
 

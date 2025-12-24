@@ -91,19 +91,18 @@ const resendResetCode = catchAsync(async (req, res) => {
 });
 
 
-const resendVerifyCode = catchAsync(async (req, res) => {
-  const result = await AuthServices.resendVerifyCode(req?.body.email);
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Verify code resend successfully',
-    data: result,
-  });
-});
+// const resendVerifyCode = catchAsync(async (req, res) => {
+//   const result = await AuthServices.resendVerifyCode(req?.body.email);
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Verify code resend successfully',
+//     data: result,
+//   });
+// });
 
 
 const deleteUser = catchAsync(async (req, res) => {
-  console.log(req.user.id)
   const result = await AuthServices.deleteUser(req.user.id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -118,7 +117,7 @@ export const AuthControllers = {
   forgetPassword,
   changePassword,
   resendResetCode,
-  resendVerifyCode,
+  // resendVerifyCode,
   resetPassword,
   verifyResetOtp,
   deleteUser

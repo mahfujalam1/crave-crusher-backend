@@ -4,7 +4,6 @@ import { Comment } from './comment.model';
 // Middleware to check if the user is the author of the comment or an admin
 const checkCommentOwnershipOrAdmin = async (req: Request, res: Response, next: NextFunction) => {
     const { commentId } = req.params;
-    console.log("check comment=>", commentId)
     const user = req.user; // Assuming userId is passed in the request body or headers
     const { id: userId } = user?.id
 

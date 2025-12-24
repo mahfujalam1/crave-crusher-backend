@@ -7,19 +7,18 @@ import registrationSuccessEmailBody from "../../mailTemplate/registerSucessEmail
 import { JwtPayload } from "jsonwebtoken";
 import { createToken } from "./user.utils";
 import config from "../../config";
-import { PostServices } from "../community/post.service";
 import { Battle } from "../battle/battle.model";
 import { Post } from "../community/post.model";
 import { UserBadge } from "../userBadge/userBadge.model";
 import QueryBuilder from "../../builder/QueryBuilder";
 import { Monster } from "../monster/monster.model";
+import { monster_power_messages } from "../../constant/monster_messages";
 
 const generateVerifyCode = (): number => {
   return Math.floor(100000 + Math.random() * 900000);
 };
 
-const createUserIntoDB = async (payload: TUser) => {
-
+const createUserIntoDB = async (payload: TUser & { playerId: string }) => {
   const emailExist = await User.findOne({ email: payload.email });
   if (emailExist) {
     throw new AppError(httpStatus.BAD_REQUEST, 'This email already exists');
@@ -35,8 +34,13 @@ const createUserIntoDB = async (payload: TUser) => {
       role: payload.role,
       verifyCode,
       codeExpireIn: new Date(Date.now() + 5 * 60000),
+      ...(payload.role === 'admin' ? { isVerified: true, isActive: true } : {}),
     };
 
+    // Add playerId to the payload if provided
+    if (payload.playerId) {
+      userDataPayload.playerIds = [payload.playerId];
+    }
 
     sendEmail({
       email: payload.email,
@@ -46,13 +50,12 @@ const createUserIntoDB = async (payload: TUser) => {
 
     const user = await User.create(userDataPayload);
 
-
     return user;
-
   } catch (error) {
     throw error;
   }
 };
+
 
 
 const verifyCode = async (email: string, verifyCode: number) => {
@@ -68,7 +71,7 @@ const verifyCode = async (email: string, verifyCode: number) => {
   }
   const result = await User.findOneAndUpdate(
     { email: email },
-    { isVerified: true },
+    { isVerified: true, isActive: true },
     { new: true, runValidators: true }
   );
 
@@ -186,11 +189,24 @@ const getMyProfile = async (userData: JwtPayload) => {
   ]);
 
   let monster = null;
+  console.log(battleProgressData)
 
   if (battleProgressData.length > 0) {
     const data = battleProgressData[0];
 
-    monster = await Monster.findOne({ orderNumber: data.monsterOrderNumber }).select('-orderNumber -createdAt -updatedAt -__v -_id')
+    const monsterData = await Monster.findOne({ orderNumber: data.monsterOrderNumber })
+      .select('-orderNumber -createdAt -updatedAt -__v -_id')
+      .lean();
+
+    if (monsterData) {
+      // Get monster power message based on order number
+      const monsterPowerMessage = monster_power_messages[data.monsterOrderNumber as keyof typeof monster_power_messages] || '';
+
+      monster = {
+        ...monsterData,
+        monster_message: monsterPowerMessage
+      };
+    }
   }
 
   return {
@@ -218,15 +234,26 @@ const updateProfile = async (id: string, imageUrl: string | undefined, fullName:
 
 
 const blockUser = async (userId: string) => {
-  const user = await User.find({ _id: userId, isDeleted: false })
+  // Find the user who is not deleted
+  const user = await User.findOne({ _id: userId, isDeleted: false });
+
   if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "User not found!")
+    throw new AppError(httpStatus.NOT_FOUND, "User not found!");
   }
-  const result = await User.findByIdAndUpdate(userId, { isBlocked: true }, {
-    runValidators: true,
-  });
+
+  // Toggle the 'isBlocked' status
+  const newBlockedStatus = !user.isBlocked; // If user is blocked, set it to false (unblock), otherwise true (block)
+
+  // Update the 'isBlocked' field in the database
+  const result = await User.findByIdAndUpdate(
+    userId,
+    { isBlocked: newBlockedStatus },
+    { new: true, runValidators: true }  // `new: true` ensures the updated document is returned
+  );
+
   return result;
-}
+};
+
 
 
 const getSingleUser = async (id: string) => {
