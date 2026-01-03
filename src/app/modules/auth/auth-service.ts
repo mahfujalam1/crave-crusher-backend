@@ -1,7 +1,7 @@
 
 import config from "../../config";
 import bcrypt from 'bcrypt';
-import sendEmail from "../../utils/sendEmail";
+import sendEmail from "../../utilities/sendEmail";
 import resetPasswordEmailBody from "../../mailTemplate/resetPasswordEmailBody";
 import User from "../user/user-model";
 import AppError from "../../error/appError";

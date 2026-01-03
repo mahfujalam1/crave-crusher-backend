@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { VoteServices } from './vote.service';
-import catchAsync from '../../utils/catchAsync';
+import catchAsync from '../../utilities/catchAsync';
 import httpStatus from 'http-status';
-import sendResponse from '../../utils/sendResponse';
+import sendResponse from '../../utilities/sendResponse';
 
 const votePost = catchAsync(async (req: Request, res: Response) => {
     const { postId } = req.params;

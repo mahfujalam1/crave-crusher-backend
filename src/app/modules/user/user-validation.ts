@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ENUM_USER_STATUS } from "../../utils/enum";
+import { ENUM_USER_STATUS } from "../../utilities/enum";
 
 // Define the schema
 const UserValidationSchema = z.object({

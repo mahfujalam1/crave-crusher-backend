@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { UserServices } from "./user-service";
-import catchAsync from "../../utils/catchAsync";
-import sendResponse from "../../utils/sendResponse";
+import catchAsync from "../../utilities/catchAsync";
+import sendResponse from "../../utilities/sendResponse";
 import httpStatus from "http-status";
 
 export const createUser = catchAsync(async (req, res, next) => {

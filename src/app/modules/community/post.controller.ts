@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import catchAsync from '../../utils/catchAsync';
+import catchAsync from '../../utilities/catchAsync';
 import { PostServices } from './post.service';
 import httpStatus from 'http-status';
-import sendResponse from '../../utils/sendResponse';
+import sendResponse from '../../utilities/sendResponse';
 
 
 const createPost = catchAsync(async (req: Request, res: Response) => {

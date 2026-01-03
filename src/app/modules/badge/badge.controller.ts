@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import catchAsync from '../../utils/catchAsync';
-import sendResponse from '../../utils/sendResponse';
+import catchAsync from '../../utilities/catchAsync';
+import sendResponse from '../../utilities/sendResponse';
 import httpStatus from 'http-status';
 import { BadgeServices } from './badge.service';
 

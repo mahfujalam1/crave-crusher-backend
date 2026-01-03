@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import catchAsync from '../../utils/catchAsync';
+import catchAsync from '../../utilities/catchAsync';
 import { CommentServices } from './comment.service';
-import sendResponse from '../../utils/sendResponse';
+import sendResponse from '../../utilities/sendResponse';
 import httpStatus from 'http-status';
 
 // Create a comment

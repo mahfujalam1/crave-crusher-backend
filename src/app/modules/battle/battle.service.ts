@@ -126,7 +126,7 @@ const updateBattleDayStatus = async (
             const today = new Date().toDateString();
             const lastCraveDay = badgeProgress.lastCraveDate?.toDateString();
 
-            if (lastCraveDay == today) {
+            if (lastCraveDay !== today) {
                 badgeProgress.craveCount += 1;
                 badgeProgress.lastCraveDate = new Date();
 
@@ -198,8 +198,6 @@ const updateBattleDayStatus = async (
     await battle.save();
     return battle;
 };
-
-
 
 const getUserBattles = async (userId: string, status?: string) => {
     const matchStage: any = {

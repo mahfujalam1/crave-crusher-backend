@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { AuthServices } from "./auth-service";
-import catchAsync from "../../utils/catchAsync";
-import sendResponse from "../../utils/sendResponse";
+import catchAsync from "../../utilities/catchAsync";
+import sendResponse from "../../utilities/sendResponse";
 import httpStatus from "http-status";
 
 const logInUser = catchAsync(async (req, res, next) => {
@@ -39,6 +39,7 @@ const forgetPassword = catchAsync(async (req, res) => {
 
 
 const changePassword = catchAsync(async (req, res) => {
+  console.log("===========", req.body);
   const { ...passwordData } = req.body;
   const result = await AuthServices.changePasswordIntoDB(
     req.user,

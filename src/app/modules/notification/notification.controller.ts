@@ -1,6 +1,6 @@
 
-import catchAsync from '../../utils/catchAsync';
-import sendResponse from '../../utils/sendResponse';
+import catchAsync from '../../utilities/catchAsync';
+import sendResponse from '../../utilities/sendResponse';
 import notificationService from './notification.services';
 
 const getAllNotification = catchAsync(async (req, res) => {

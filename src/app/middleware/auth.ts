@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { NextFunction, Request, Response } from 'express';
 import { TUserRole } from '../modules/user/user-interface';
-import catchAsync from '../utils/catchAsync';
+import catchAsync from '../utilities/catchAsync';
 import AppError from '../error/appError';
 import httpStatus from 'http-status';
 import config from '../config';

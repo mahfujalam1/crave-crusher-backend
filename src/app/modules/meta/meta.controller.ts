@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import MetaService from './meta.service';
-import catchAsync from '../../utils/catchAsync';
-import sendResponse from '../../utils/sendResponse';
+import catchAsync from '../../utilities/catchAsync';
+import sendResponse from '../../utilities/sendResponse';
 
 const getDashboardMetaData = catchAsync(async (req, res) => {
   const result = await MetaService.getDashboardMetaData();

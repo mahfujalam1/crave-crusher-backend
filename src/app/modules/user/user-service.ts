@@ -2,7 +2,7 @@ import httpStatus from "http-status";
 import { IOtherData, TUser, TUserRole } from "./user-interface";
 import AppError from "../../error/appError";
 import User from "./user-model";
-import sendEmail from "../../utils/sendEmail";
+import sendEmail from "../../utilities/sendEmail";
 import registrationSuccessEmailBody from "../../mailTemplate/registerSucessEmail";
 import { JwtPayload } from "jsonwebtoken";
 import { createToken } from "./user.utils";

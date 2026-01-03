@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 
 import { ManageService } from './manage.service';
-import catchAsync from '../../utils/catchAsync';
-import sendResponse from '../../utils/sendResponse';
+import catchAsync from '../../utilities/catchAsync';
+import sendResponse from '../../utilities/sendResponse';
 
 const addAboutUs = catchAsync(async (req: Request, res: Response) => {
   const result = await ManageService.addAboutUs(req.body);

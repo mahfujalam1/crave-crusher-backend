@@ -25,8 +25,6 @@ const updatePostIntoDB = async (
     if (!post) {
         throw new AppError(httpStatus.NOT_FOUND, 'Post not found');
     }
-
-
     if (post.authorId.toString() !== authorId) {
         throw new AppError(httpStatus.FORBIDDEN, "You are not authorized to update this post");
     }
