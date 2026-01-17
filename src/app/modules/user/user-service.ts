@@ -106,6 +106,7 @@ const verifyCode = async (email: string, verifyCode: number) => {
 
 const resendVerifyCode = async (email: string) => {
   const user = await User.findOne({ email: email });
+
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
@@ -124,11 +125,16 @@ const resendVerifyCode = async (email: string) => {
       'Something went wrong . Please again resend the code after a few second'
     );
   }
-  sendEmail({
-    email: user.email,
-    subject: 'Activate Your Account',
-    html: registrationSuccessEmailBody('Dear', updateUser.verifyCode),
-  });
+  console.log(user)
+  try {
+    sendEmail({
+      email: user.email,
+      subject: 'Activate Your Account',
+      html: registrationSuccessEmailBody('Dear', updateUser.verifyCode),
+    });
+  } catch (err) {
+    console.log(err)
+  }
   return null;
 };
 

@@ -18,7 +18,7 @@ const sendContactUsEmail = async (req: Request, res: Response) => {
 
     const { name, phone, email, message } = req.body;
 
-    await sendEmail({
+     sendEmail({
       email: 'devsmanik@gmail.com',
       subject: 'Contact Us Info',
       html: `

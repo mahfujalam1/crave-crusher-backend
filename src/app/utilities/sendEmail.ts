@@ -16,28 +16,34 @@ const sendEmail = async (options: {
     subject: string;
     html: any;
 }) => {
-    const transporter = nodemailer.createTransport({
-        // host: config.smtp.smtp_host,
-        host: config.smtp.smtp_host,
-        port: parseInt(config.smtp.smtp_port as string),
-        auth: {
-            user: config.smtp.smtp_mail,
-            pass: config.smtp.smtp_pass,
-        },
-    });
 
-    const { email, subject, html } = options;
+    try {
+        const transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: parseInt(config.smtp.smtp_port as string),
+            secure: true,
+            auth: {
+                user: config.smtp.smtp_mail,
+                pass: config.smtp.smtp_pass,
+            },
+        });
+        // console.log("options", options);
 
-    const mailOptions = {
-        from: `${config.smtp.name} <${config.smtp.smtp_mail}>`,
-        to: email,
-        date: formattedDate,
-        signed_by: 'bdCalling.com',
-        subject,
-        html,
-    };
+        const { email, subject, html } = options;
 
-    await transporter.sendMail(mailOptions);
+        const mailOptions = {
+            from: `${config.smtp.name} <${config.smtp.smtp_mail}>`,
+            to: email,
+            date: formattedDate,
+            signed_by: 'bdCalling.com',
+            subject,
+            html,
+        };
+
+        await transporter.sendMail(mailOptions);
+    } catch (err) {
+        console.log('Email not sent', err);
+    }
 };
 
 export default sendEmail;

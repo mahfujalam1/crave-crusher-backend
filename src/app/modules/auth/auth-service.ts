@@ -36,7 +36,7 @@ const logInUserIntoDB = async (payload: TLogin & { playerId?: string }) => {
     user.verifyCode = verifyCode;
     user.save();
 
-    sendEmail({
+   sendEmail({
       email: payload.email,
       subject: 'Activate Your Account',
       html: registrationSuccessEmailBody(user.fullName, verifyCode),
