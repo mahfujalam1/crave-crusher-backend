@@ -16,7 +16,7 @@ const BattleSchema = new Schema<IBattle>({
     lastCheckInAt: { type: Date, default: null },
     lastCheckInStatus: {
         type: String,
-        enum: ['craved', 'caved'],
+        enum: ['craved', 'caved', 'missed'],
         default: null
     }
 }, { timestamps: true });

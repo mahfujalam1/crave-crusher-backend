@@ -21,7 +21,9 @@ const updatePostIntoDB = async (
     deleted_images: string[],
     authorId: string
 ) => {
+    console.log({id, payload, deleted_images, authorId})
     const post = await Post.findById(id);
+    console.log(post)
     if (!post) {
         throw new AppError(httpStatus.NOT_FOUND, 'Post not found');
     }

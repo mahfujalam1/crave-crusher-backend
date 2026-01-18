@@ -38,7 +38,7 @@ export interface IBattle {
     runningDay?: number;
     isDeleted: boolean;
     lastCheckInAt: Date | null;
-    lastCheckInStatus: 'craved' | 'caved' | null;
+    lastCheckInStatus: 'craved' | 'caved' | 'missed' | null;
 }
 
 

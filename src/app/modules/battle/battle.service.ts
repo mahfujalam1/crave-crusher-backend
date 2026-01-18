@@ -88,12 +88,14 @@ const updateBattleDayStatus = async (
         throw new AppError(httpStatus.NOT_FOUND, 'Battle not found or not active');
     }
 
-    // ✅ New condition: skip checking for multiple check-ins if in testing mode
-    const isTestingMode = 'test';  // or another flag you can set for testing
-
-    // ✅ Enforce: one check-in per day (unless testing mode is enabled)
     const now = new Date();
-    if (!isTestingMode && battle.lastCheckInAt && utcDateKey(battle.lastCheckInAt) === utcDateKey(now)) {
+
+    // Log the battle's last check-in date and today's date
+    console.log('Last Check-In Date:', battle.lastCheckInAt);
+    console.log('Today\'s Date:', now);
+
+    // Enforce: one check-in per day (no test mode bypass anymore)
+    if (battle.lastCheckInAt && utcDateKey(battle.lastCheckInAt) === utcDateKey(now)) {
         throw new AppError(httpStatus.BAD_REQUEST, 'You already checked in today');
     }
 
@@ -108,15 +110,13 @@ const updateBattleDayStatus = async (
     battleLog.status = status;
     await battleLog.save();
 
-    // ✅ NEW: update last check-in fields (only these new props)
-    if (status === BattleLogStatus.CRAVED || status === BattleLogStatus.CAVED) {
-        battle.lastCheckInAt = now;
-        battle.lastCheckInStatus =
-            status === BattleLogStatus.CRAVED ? 'craved' : 'caved';
-    }
+    // ✅ Only update badge progress and last check-in if status is updated successfully
+    let badgeProgressUpdated = false;
 
     // Only update progress if status is "crave"
     if (status === BattleLogStatus.CRAVED) {
+        battle.lastCheckInAt = now;
+        battle.lastCheckInStatus = 'craved';
         battle.totalCrave += 1;
         battle.battleProgress = Math.round((battle.totalCrave / battle.battleLength) * 100);
 
@@ -177,27 +177,36 @@ const updateBattleDayStatus = async (
                 }
 
                 await badgeProgress.save();
+                badgeProgressUpdated = true; // Mark badge progress as updated
             }
         }
     }
 
-    // Move to next day
-    if (currentDay < battle.battleLength) {
-        battle.day += 1;
-    } else {
-        // Battle completed
-        battle.battleStatus = BattleStatus.COMPLETE;
-        await sendSinglePushNotification(
-            userId,
-            'Battle Complete!',
-            `Congratulations! You've completed your ${battle.addictionType} battle!`,
-            { battleId: battle._id.toString() }
-        );
+    // Move to next day if status was updated successfully
+    if (status === BattleLogStatus.CRAVED || status === BattleLogStatus.CAVED) {
+        // Only update battle progress and move to the next day if the status was valid
+        if (!badgeProgressUpdated) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'Could not update badge progress');
+        }
+
+        if (currentDay < battle.battleLength) {
+            battle.day += 1;
+        } else {
+            // Battle completed
+            battle.battleStatus = BattleStatus.COMPLETE;
+            await sendSinglePushNotification(
+                userId,
+                'Battle Complete!',
+                `Congratulations! You've completed your ${battle.addictionType} battle!`,
+                { battleId: battle._id.toString() }
+            );
+        }
     }
 
     await battle.save();
     return battle;
 };
+
 
 const getUserBattles = async (userId: string, status?: string) => {
     const matchStage: any = {
