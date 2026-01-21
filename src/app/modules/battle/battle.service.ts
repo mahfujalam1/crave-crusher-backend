@@ -231,7 +231,19 @@ const getUserBattles = async (userId: string, status?: string) => {
                         else: "pending"
                     }
                 },
-                runningDay: "$day"
+                runningDay: "$day",
+                dayProgress: {
+                    $add: [
+                        {
+                            $dateDiff: {
+                                startDate: "$createdAt",
+                                endDate: new Date(),
+                                unit: "day"
+                            }
+                        },
+                        1
+                    ]
+                }
             }
         },
         {
@@ -291,12 +303,25 @@ const getBattleById = async (battleId: string, userId: string) => {
         monster_message: monsterMessage
     } : null;
 
+    // Calculate dayProgress
+    const createdAtDate = new Date(battle.createdAt as Date);
+    const today = new Date();
+
+    // Reset time to midnight for accurate day calculation
+    createdAtDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    const diffTime = today.getTime() - createdAtDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const dayProgress = diffDays + 1;
+
     const battleWithStatus = {
         ...battle,
         todayStatus: battle.lastCheckInStatus !== null && battle.lastCheckInStatus !== undefined
             ? battle.lastCheckInStatus
             : "pending",
-        runningDay: battle.day
+        runningDay: battle.day,
+        dayProgress: dayProgress
     };
 
     return {

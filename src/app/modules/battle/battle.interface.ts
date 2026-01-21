@@ -39,6 +39,7 @@ export interface IBattle {
     isDeleted: boolean;
     lastCheckInAt: Date | null;
     lastCheckInStatus: 'craved' | 'caved' | 'missed' | null;
+    createdAt?:Date
 }
 
 
