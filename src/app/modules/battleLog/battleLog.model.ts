@@ -8,7 +8,9 @@ const BattleLogSchema = new Schema<IBattleLog>({
         type: String,
         enum: Object.values(BattleLogStatus),
         default: null
-    }
+    },
+    totalCraved:{type:Number, default:0},
+    totalCaved:{type:Number, default:0},
 }, { timestamps: true });
 
 export const BattleLog = model<IBattleLog>('BattleLog', BattleLogSchema);

@@ -88,17 +88,6 @@ const updateBattleDayStatus = async (
         throw new AppError(httpStatus.NOT_FOUND, 'Battle not found or not active');
     }
 
-    const now = new Date();
-
-    // Log the battle's last check-in date and today's date
-    console.log('Last Check-In Date:', battle.lastCheckInAt);
-    console.log('Today\'s Date:', now);
-
-    // Enforce: one check-in per day (no test mode bypass anymore)
-    if (battle.lastCheckInAt && utcDateKey(battle.lastCheckInAt) === utcDateKey(now)) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'You already checked in today');
-    }
-
     const currentDay = battle.day;
     const battleLog = await BattleLog.findOne({ battleId, day: currentDay });
 
@@ -106,106 +95,100 @@ const updateBattleDayStatus = async (
         throw new AppError(httpStatus.NOT_FOUND, 'Battle log not found');
     }
 
-    // Update battle log status
-    battleLog.status = status;
-    await battleLog.save();
-
-    // ✅ Only update badge progress and last check-in if status is updated successfully
-    let badgeProgressUpdated = false;
-
     // Only update progress if status is "crave"
     if (status === BattleLogStatus.CRAVED) {
-        battle.lastCheckInAt = now;
-        battle.lastCheckInStatus = 'craved';
-        battle.totalCrave += 1;
-        battle.battleProgress = Math.round((battle.totalCrave / battle.battleLength) * 100);
+        battleLog.totalCraved += 1
 
-        const badgeProgress = await BadgeProgress.findOne({ userId }).populate('currentBadgeId nextBadgeId');
-
-        if (badgeProgress) {
-            const today = new Date().toDateString();
-            const lastCraveDay = badgeProgress.lastCraveDate?.toDateString();
-
-            if (lastCraveDay !== today) {
-                badgeProgress.craveCount += 1;
-                badgeProgress.lastCraveDate = new Date();
-
-                const currentBadge = await Badge.findById(badgeProgress.currentBadgeId);
-                if (currentBadge) {
-                    badgeProgress.currentProgress = Math.round((badgeProgress.craveCount / currentBadge.orderNumber) * 100);
-
-                    // Badge unlock logic
-                    if (badgeProgress.currentProgress >= 100) {
-                        const existingUserBadge = await UserBadge.findOne({
-                            userId,
-                            badgeId: currentBadge._id
-                        });
-
-                        if (!existingUserBadge) {
-                            const createUserBadge = await UserBadge.create({
-                                userId,
-                                badgeId: currentBadge._id,
-                                isClaim: false
-                            });
-
-                            await sendSinglePushNotification(
-                                userId,
-                                'Badge Unlocked!',
-                                `Congratulations! You've unlocked the ${currentBadge.name} badge!`,
-                                { badgeId: currentBadge._id.toString() }
-                            );
-                        }
-
-                        // Move to next badge
-                        const nextBadge = await Badge.findOne({
-                            orderNumber: { $gt: currentBadge.orderNumber }
-                        }).sort({ orderNumber: 1 });
-
-                        if (nextBadge) {
-                            badgeProgress.currentBadgeId = nextBadge._id;
-
-                            const nextNextBadge = await Badge.findOne({
-                                orderNumber: { $gt: nextBadge.orderNumber },
-                            })
-                                .sort({ orderNumber: 1 })
-                                .select('_id');
-
-                            badgeProgress.nextBadgeId = nextNextBadge?._id ?? null;
-                            badgeProgress.currentProgress = 0; // Reset for new badge
-                        }
-                    }
-                }
-
-                await badgeProgress.save();
-                badgeProgressUpdated = true; // Mark badge progress as updated
-            }
-        }
+    } else if (status === BattleLogStatus.CAVED) {
+        battleLog.totalCaved += 1
     }
 
     // Move to next day if status was updated successfully
-    if (status === BattleLogStatus.CRAVED || status === BattleLogStatus.CAVED) {
-        // Only update battle progress and move to the next day if the status was valid
-        if (!badgeProgressUpdated) {
-            throw new AppError(httpStatus.BAD_REQUEST, 'Could not update badge progress');
-        }
-
-        if (currentDay < battle.battleLength) {
-            battle.day += 1;
-        } else {
-            // Battle completed
-            battle.battleStatus = BattleStatus.COMPLETE;
-            await sendSinglePushNotification(
-                userId,
-                'Battle Complete!',
-                `Congratulations! You've completed your ${battle.addictionType} battle!`,
-                { battleId: battle._id.toString() }
-            );
-        }
-    }
-
-    await battle.save();
+    await battleLog.save();
     return battle;
 };
+
+
+const BattleOrBadgeProgress = async (battle: Partial<IBattle>) => {
+    console.log({ battle })
+    if (!battle.userId || !battle.battleLength || battle.totalCrave === undefined) {
+        console.error("Invalid battle data");
+        return;
+    }
+
+    console.log({battle})
+
+    const { userId } = battle;
+    const now = new Date();
+
+    // Only update progress if status is "crave"
+    battle.lastCheckInAt = now;
+    battle.lastCheckInStatus = 'craved';
+    battle.totalCrave += 1;
+    battle.battleProgress = Math.round((battle.totalCrave / battle.battleLength) * 100);
+
+    const badgeProgress = await BadgeProgress.findOne({ userId }).populate('currentBadgeId nextBadgeId');
+
+    if (badgeProgress) {
+        const today = new Date().toDateString();
+        const lastCraveDay = badgeProgress.lastCraveDate?.toDateString();
+
+        if (lastCraveDay !== today) {
+            badgeProgress.craveCount += 1;
+            badgeProgress.lastCraveDate = new Date();
+
+            const currentBadge = await Badge.findById(badgeProgress.currentBadgeId);
+            if (currentBadge) {
+                badgeProgress.currentProgress = Math.round((badgeProgress.craveCount / currentBadge.orderNumber) * 100);
+
+                // Badge unlock logic
+                if (badgeProgress.currentProgress >= 100) {
+                    const existingUserBadge = await UserBadge.findOne({
+                        userId,
+                        badgeId: currentBadge._id
+                    });
+
+                    if (!existingUserBadge) {
+                        const createUserBadge = await UserBadge.create({
+                            userId,
+                            badgeId: currentBadge._id,
+                            isClaim: false
+                        });
+
+                        await sendSinglePushNotification(
+                            userId.toString(),
+                            'Badge Unlocked!',
+                            `Congratulations! You've unlocked the ${currentBadge.name} badge!`,
+                            { badgeId: currentBadge._id.toString() }
+                        );
+                    }
+
+                    // Move to next badge
+                    const nextBadge = await Badge.findOne({
+                        orderNumber: { $gt: currentBadge.orderNumber }
+                    }).sort({ orderNumber: 1 });
+
+                    if (nextBadge) {
+                        badgeProgress.currentBadgeId = nextBadge._id;
+
+                        const nextNextBadge = await Badge.findOne({
+                            orderNumber: { $gt: nextBadge.orderNumber },
+                        })
+                            .sort({ orderNumber: 1 })
+                            .select('_id');
+
+                        badgeProgress.nextBadgeId = nextNextBadge?._id ?? null;
+                        badgeProgress.currentProgress = 0; // Reset for new badge
+                    }
+                }
+            }
+
+            await badgeProgress.save();
+        }
+    }
+    return;
+}
+
 
 
 const getUserBattles = async (userId: string, status?: string) => {
@@ -354,5 +337,6 @@ export const BattleServices = {
     updateBattleDayStatus,
     getUserBattles,
     getBattleById,
-    cancelBattle
+    cancelBattle,
+    BattleOrBadgeProgress,
 };

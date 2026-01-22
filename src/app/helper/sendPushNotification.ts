@@ -51,7 +51,7 @@ const sendNotification = async (
 
 // Send notification to single user by userId
 export const sendSinglePushNotification = async (
-    userId: string,
+    userId: string ,
     title: string,
     message: string,
     data: NotificationData = {}

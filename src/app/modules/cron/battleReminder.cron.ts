@@ -4,6 +4,7 @@ import { BattleStatus } from '../battle/battle.interface';
 import { BattleLog } from '../battleLog/battleLog.model';
 import { sendBatchPushNotification } from '../../helper/sendPushNotification';
 import { BattleLogStatus } from '../battleLog/battleLog.interface';
+import { BattleServices } from '../battle/battle.service';
 
 // Run every day at 10:00 PM (22:00)
 // TESTING VERSION - Runs every 3 minutes
@@ -59,56 +60,49 @@ export const battleReminderCron = cron.schedule('0 22 * * *', async () => {
 
 
 
-export const markMissedDaysCron = cron.schedule('0 0 * * *', async () => {
+export const markMissedDaysCron = cron.schedule('58 23 * * *', async () => {
 
     try {
         // Find all active battles
         const activeBattles = await Battle.find({
             battleStatus: BattleStatus.ACTIVE,
             isDeleted: false
-        }).select('_id day battleStatus createdAt');
-
+        });
 
         if (activeBattles.length === 0) {
             return;
         }
 
-        let markedCount = 0;
-        let alreadyCompletedCount = 0;
-        let skippedCount = 0;
-
         for (const battle of activeBattles) {
             try {
-                // Current battle day
                 const currentBattleDay = battle.day;
 
-                const previousDay = currentBattleDay - 1;
-                if (previousDay < 1) {
-                    skippedCount++;
-                    continue;
-                }
-
-                // Find previous day's log
-                const previousDayLog = await BattleLog.findOne({
+                const currentDayLog = await BattleLog.findOne({
                     battleId: battle._id,
-                    day: previousDay
+                    day: currentBattleDay
                 });
+                console.log(currentDayLog);
 
-                if (!previousDayLog) {
-                    await BattleLog.create({
-                        battleId: battle._id,
-                        day: previousDay,
-                        status: BattleLogStatus.MISSED
-                    });
-                    markedCount++;
-                    continue;
+                if (!currentDayLog) {
+                    continue; 
                 }
-                if (previousDayLog.status === null || previousDayLog.status === undefined) {
-                    previousDayLog.status = BattleLogStatus.MISSED;
-                    await previousDayLog.save();
-                    markedCount++;
-                } else {
-                    alreadyCompletedCount++;
+
+                if (currentDayLog.totalCraved > currentDayLog.totalCaved) {
+                    currentDayLog.status = BattleLogStatus.CRAVED;
+                    battle.day += 1; 
+                    await battle.save();
+
+                    await BattleServices.BattleOrBadgeProgress(battle);
+                } else if (currentDayLog.totalCraved <= currentDayLog.totalCaved) {
+                    battle.day += 1; 
+                    await battle.save(); 
+
+                    if (currentDayLog.totalCraved === 0 && currentDayLog.totalCaved === 0) {
+                        currentDayLog.status = BattleLogStatus.MISSED;
+                    } else {
+                        currentDayLog.status = BattleLogStatus.CAVED;
+                    }
+                    await currentDayLog.save();
                 }
 
             } catch (battleError) {
@@ -116,7 +110,6 @@ export const markMissedDaysCron = cron.schedule('0 0 * * *', async () => {
                 continue;
             }
         }
-
 
     } catch (error) {
         console.error('❌ Critical error in mark missed days cron:', error);

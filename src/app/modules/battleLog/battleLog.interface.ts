@@ -10,4 +10,6 @@ export interface IBattleLog {
     battleId: Types.ObjectId;
     day: number;
     status: BattleLogStatus | null;
+    totalCraved:number;
+    totalCaved:number;
 }
