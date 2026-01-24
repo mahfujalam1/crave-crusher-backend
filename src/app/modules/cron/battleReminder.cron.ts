@@ -61,9 +61,7 @@ export const battleReminderCron = cron.schedule('0 22 * * *', async () => {
 
 
 export const markMissedDaysCron = cron.schedule('58 23 * * *', async () => {
-
     try {
-        // Find all active battles
         const activeBattles = await Battle.find({
             battleStatus: BattleStatus.ACTIVE,
             isDeleted: false
@@ -81,7 +79,6 @@ export const markMissedDaysCron = cron.schedule('58 23 * * *', async () => {
                     battleId: battle._id,
                     day: currentBattleDay
                 });
-                console.log(currentDayLog);
 
                 if (!currentDayLog) {
                     continue; 
@@ -90,6 +87,7 @@ export const markMissedDaysCron = cron.schedule('58 23 * * *', async () => {
                 if (currentDayLog.totalCraved > currentDayLog.totalCaved) {
                     currentDayLog.status = BattleLogStatus.CRAVED;
                     battle.day += 1; 
+                    battle.lastCheckInStatus = BattleLogStatus.CRAVED;
                     await battle.save();
 
                     await BattleServices.BattleOrBadgeProgress(battle);
@@ -98,9 +96,11 @@ export const markMissedDaysCron = cron.schedule('58 23 * * *', async () => {
                     await battle.save(); 
 
                     if (currentDayLog.totalCraved === 0 && currentDayLog.totalCaved === 0) {
+                        battle.lastCheckInStatus = BattleLogStatus.MISSED;
                         currentDayLog.status = BattleLogStatus.MISSED;
                     } else {
                         currentDayLog.status = BattleLogStatus.CAVED;
+                        battle.lastCheckInStatus = BattleLogStatus.CAVED;
                     }
                     await currentDayLog.save();
                 }
