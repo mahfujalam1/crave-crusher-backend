@@ -261,19 +261,15 @@ const getBattleById = async (battleId: string, userId: string) => {
     // Get monster message based on addiction type and current day
     let monsterMessage = '';
 
-    // Convert addiction type to match monster_messages key format
-    // "Shopping Detox" -> "SHOPPING_DETOX"
     const addictionTypeKey = battle.addictionType
         .toUpperCase()
         .replace(/\s+/g, '_') as keyof typeof monster_messages;
 
     const currentDay = battle.day;
 
-    // Direct access to messages array using the addiction type key
     if (monster_messages[addictionTypeKey]) {
         const messages = monster_messages[addictionTypeKey];
 
-        // Find exact day match or the closest previous day
         const messageObj = messages
             .filter((msg) => msg.day <= currentDay)
             .sort((a, b) => b.day - a.day)[0];
@@ -283,7 +279,6 @@ const getBattleById = async (battleId: string, userId: string) => {
         }
     }
 
-    // Add monster_message to monster object
     const monsterWithMessage = monster ? {
         ...monster,
         monster_message: monsterMessage
@@ -293,7 +288,6 @@ const getBattleById = async (battleId: string, userId: string) => {
     const createdAtDate = new Date(battle.createdAt as Date);
     const today = new Date();
 
-    // Reset time to midnight for accurate day calculation
     createdAtDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
 
@@ -301,13 +295,18 @@ const getBattleById = async (battleId: string, userId: string) => {
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const dayProgress = diffDays + 1;
 
+    // Find today's battle log
+    const todayBattleLog = battleLogs.find(log => log.day === battle.day);
+
     const battleWithStatus = {
         ...battle,
         todayStatus: battle.lastCheckInStatus !== null && battle.lastCheckInStatus !== undefined
             ? battle.lastCheckInStatus
             : "pending",
         runningDay: battle.day,
-        dayProgress: dayProgress
+        dayProgress: dayProgress,
+        todayCravedCount: todayBattleLog?.totalCraved || 0,
+        todayCavedCount: todayBattleLog?.totalCaved || 0
     };
 
     return {
