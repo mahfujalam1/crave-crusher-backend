@@ -98,13 +98,16 @@ const updateBattleDayStatus = async (
     // Only update progress if status is "crave"
     if (status === BattleLogStatus.CRAVED) {
         battleLog.totalCraved += 1
-
+        battleLog.status = BattleLogStatus.CRAVED;
+        battle.lastCheckInStatus = BattleLogStatus.CRAVED;
     } else if (status === BattleLogStatus.CAVED) {
         battleLog.totalCaved += 1
+        battleLog.status = BattleLogStatus.CAVED;
+        battle.lastCheckInStatus = BattleLogStatus.CAVED;
     }
 
-    // Move to next day if status was updated successfully
     await battleLog.save();
+    await battle.save()
     return battle;
 };
 

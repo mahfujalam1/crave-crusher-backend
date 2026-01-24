@@ -85,24 +85,23 @@ export const markMissedDaysCron = cron.schedule('58 23 * * *', async () => {
                 }
 
                 if (currentDayLog.totalCraved > currentDayLog.totalCaved) {
+                    battle.day += 1;
                     currentDayLog.status = BattleLogStatus.CRAVED;
-                    battle.day += 1; 
                     battle.lastCheckInStatus = BattleLogStatus.CRAVED;
+                    await currentDayLog.save();
                     await battle.save();
-
                     await BattleServices.BattleOrBadgeProgress(battle);
                 } else if (currentDayLog.totalCraved <= currentDayLog.totalCaved) {
-                    battle.day += 1; 
-                    await battle.save(); 
-
+                    battle.day += 1;
                     if (currentDayLog.totalCraved === 0 && currentDayLog.totalCaved === 0) {
-                        battle.lastCheckInStatus = BattleLogStatus.MISSED;
+                        battle.lastCheckInStatus = BattleLogStatus.MISSED; 
                         currentDayLog.status = BattleLogStatus.MISSED;
                     } else {
-                        currentDayLog.status = BattleLogStatus.CAVED;
                         battle.lastCheckInStatus = BattleLogStatus.CAVED;
+                        currentDayLog.status = BattleLogStatus.CAVED;
                     }
-                    await currentDayLog.save();
+                    await currentDayLog.save(); 
+                    await battle.save(); 
                 }
 
             } catch (battleError) {
@@ -117,3 +116,4 @@ export const markMissedDaysCron = cron.schedule('58 23 * * *', async () => {
 }, {
     timezone: "UTC"
 });
+
