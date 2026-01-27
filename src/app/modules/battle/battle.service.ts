@@ -13,7 +13,6 @@ import { Monster } from '../monster/monster.model';
 import Notification from '../notification/notification.model';
 import { monster_messages } from '../../constant/monster_messages';
 
-const utcDateKey = (d: Date) => d.toISOString().slice(0, 10);
 
 const createBattleIntoDB = async (userId: string, payload: Partial<IBattle>) => {
     const battleData = {
